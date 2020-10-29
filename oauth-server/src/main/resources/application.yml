@@ -1,0 +1,17 @@
+server:
+  port: 9090
+spring:
+  application.name: oauth-server
+  profiles.active: dev
+  datasource:
+    url: jdbc:mysql://39.106.118.71/oauth?characterEncoding=utf-8
+    username: ENC(3RS678xyF+OMSsvPhk/Jog==)
+    password: ENC(ZSbSDPMfbQpDqKwJvcoTR/vaEBBEF1ew)
+    driver-class-name: com.mysql.jdbc.Driver
+
+---
+spring.profiles: dev
+
+# 指定log4j2作为日志记录
+logging:
+  config: classpath:log4j2-9090.xml
