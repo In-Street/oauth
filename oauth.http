@@ -1,0 +1,42 @@
+###oauth-server:【oauth_client_details表中authorized_grant_types字段定义客户端使用的许可类型】 资源拥有者凭证许可类型，获取access_token,refresh_token
+POST {{url}}/oauth/token?grant_type=password&client_id=userservice1&client_secret=1234&username=writer&password=writer
+Accept: application/json
+Cache-Control: no-cache
+
+###oauth-server: access_token校验合法性
+GET {{url}}/oauth/check_token?client_id=userservice1&client_secret=1234&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJzY29wZSI6WyJGT08iXSwiZXhwIjoxNjA0NDAyMDEzLCJhdXRob3JpdGllcyI6WyJSRUFEIiwiV1JJVEUiXSwianRpIjoiYzFlNTYwMzYtNGI3NC00NGVlLThlYjQtM2ZmMmM4MDE3YjFiIiwiY2xpZW50X2lkIjoidXNlcnNlcnZpY2UyIn0.AkT8Ew5-TuDYZ5Psks6V__nBHDCVqL4PPG4viGCUARcF9THbl_ZIQLM7v6GbewLkO7JdA20x1HFd8L6o5l6IOIUpRoVEmsMbCi6m1UVGKlhd196kVLjLaf2w2LlMKBn-plZ-6GXq_JskcGdMPXSym-2-DsM0Fqe6r1jAxYBWxMqYlKimENq-LrAPCiClPztcoQQRpss3zEnmkSa-YjQNgYiY_p8Kt6nZfTnJfVvne0AlvJUf5RVunhyWhnASuVYFph1uyxs206SofZK0VdhSkLIuAP9BrorX5l5ISwKKZzwsG2lv7VIUTjGlfzSxB9yA2wOwtgOhhkpE9URnyOEoUA
+Accept: application/json
+Cache-Control: no-cache
+
+
+
+###oauth-server:客户端授权许可类型，获取access_token
+POST {{url}}/oauth/token?grant_type=client_credentials&client_id=userservice2&client_secret=1234
+Accept: application/json
+Cache-Control: no-cache
+
+
+
+### 获取授权码
+GET http://localhost:9090/oauth/authorize?response_type=code&client_id=userservice2&redirect_uri=https://baidu.com
+Accept: application/json
+Cache-Control: no-cache
+
+
+###通过授权码获取访问令牌
+POST {{url}}/oauth/token?grant_type=authorization_code&client_id=userservice3&client_secret=1234&code=l0cVc7&redirect_uri=https://baidu.com
+Accept: application/json
+Cache-Control: no-cache
+
+
+###
+GET {{url}}/user/read
+Accept: *
+Cache-Control: no-cache
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJzY29wZSI6WyJGT08iXSwiZXhwIjoxNjA0NDAyMDEzLCJhdXRob3JpdGllcyI6WyJSRUFEIiwiV1JJVEUiXSwianRpIjoiYzFlNTYwMzYtNGI3NC00NGVlLThlYjQtM2ZmMmM4MDE3YjFiIiwiY2xpZW50X2lkIjoidXNlcnNlcnZpY2UyIn0.AkT8Ew5-TuDYZ5Psks6V__nBHDCVqL4PPG4viGCUARcF9THbl_ZIQLM7v6GbewLkO7JdA20x1HFd8L6o5l6IOIUpRoVEmsMbCi6m1UVGKlhd196kVLjLaf2w2LlMKBn-plZ-6GXq_JskcGdMPXSym-2-DsM0Fqe6r1jAxYBWxMqYlKimENq-LrAPCiClPztcoQQRpss3zEnmkSa-YjQNgYiY_p8Kt6nZfTnJfVvne0AlvJUf5RVunhyWhnASuVYFph1uyxs206SofZK0VdhSkLIuAP9BrorX5l5ISwKKZzwsG2lv7VIUTjGlfzSxB9yA2wOwtgOhhkpE9URnyOEoUA
+
+###
+POST {{url}}/user/write
+Accept: application/json
+Cache-Control: no-cache
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJzY29wZSI6WyJGT08iXSwiZXhwIjoxNjA0NDAyMDEzLCJhdXRob3JpdGllcyI6WyJSRUFEIiwiV1JJVEUiXSwianRpIjoiYzFlNTYwMzYtNGI3NC00NGVlLThlYjQtM2ZmMmM4MDE3YjFiIiwiY2xpZW50X2lkIjoidXNlcnNlcnZpY2UyIn0.AkT8Ew5-TuDYZ5Psks6V__nBHDCVqL4PPG4viGCUARcF9THbl_ZIQLM7v6GbewLkO7JdA20x1HFd8L6o5l6IOIUpRoVEmsMbCi6m1UVGKlhd196kVLjLaf2w2LlMKBn-plZ-6GXq_JskcGdMPXSym-2-DsM0Fqe6r1jAxYBWxMqYlKimENq-LrAPCiClPztcoQQRpss3zEnmkSa-YjQNgYiY_p8Kt6nZfTnJfVvne0AlvJUf5RVunhyWhnASuVYFph1uyxs206SofZK0VdhSkLIuAP9BrorX5l5ISwKKZzwsG2lv7VIUTjGlfzSxB9yA2wOwtgOhhkpE9URnyOEoUA

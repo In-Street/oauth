@@ -1,0 +1,12 @@
+server:
+  port: 9091
+spring:
+  application.name: oauth-user
+  profiles.active: dev
+
+---
+spring.profiles: dev
+
+# 指定log4j2作为日志记录
+logging:
+  config: classpath:log4j2-9091.xml

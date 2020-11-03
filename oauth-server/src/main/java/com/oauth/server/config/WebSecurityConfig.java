@@ -29,7 +29,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	/**
-	 * 配置用户认证方式；
+	 * 配置用户认证方式 - 数据库方式；
 	 * BCryptPasswordEncoder方式保存用户密码
 	 * @param auth
 	 * @throws Exception
