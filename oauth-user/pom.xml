@@ -45,9 +45,6 @@
                     <include>*.yml</include>
                     <include>*.txt</include>
                     <include>*.xml</include>
-                    <include>*.jks</include>
-                    <include>*.cert</include>
-                    <include>*.cer</include>
                     <include>*.pem</include>
                 </includes>
             </resource>

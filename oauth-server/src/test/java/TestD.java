@@ -1,13 +1,19 @@
+import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.DigestUtils;
 import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -36,33 +42,25 @@ public class TestD {
 		PublicKey publicKey = keyStore.getCertificate("mykey").getPublicKey();
 
 		String publicKeyStr = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-		System.out.println(publicKeyStr);
-		System.out.println("............");
-
-
-		BASE64Encoder encoder = new BASE64Encoder();
-		String encoded = encoder.encode(publicKey.getEncoded());
-		FileWriter fileWriter = new FileWriter(new File("D:/pub.txt"));
-		fileWriter.write("-----Begin Public Key-----\r\n");//非必须
-		fileWriter.write(encoded);
-		fileWriter.write("\r\n-----End Public Key-----");//非必须
-		fileWriter.close();
-
-
 	}
 
 	@Test
-	public void password() {
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		String reader = encoder.encode("reader");
-		System.out.println(reader);
-	}
+	public void password() throws NoSuchAlgorithmException {
 
-	@Test
-	public void publicKey() {
-		byte[] bytes = Base64.getDecoder().decode("eyJhdWQiOlsib2F1dGgtdXNlciJdLCJ1c2VyX25hbWUiOiJyZWFkZXIiLCJ1c2VyRGV0YWlsIjp7InBhc3N3b3JkIjpudWxsLCJ1c2VybmFtZSI6InJlYWRlciIsImF1dGhvcml0aWVzIjpbeyJhdXRob3JpdHkiOiJSRUFEIn1dLCJhY2NvdW50Tm9uRXhwaXJlZCI6dHJ1ZSwiYWNjb3VudE5vbkxvY2tlZCI6dHJ1ZSwiY3JlZGVudGlhbHNOb25FeHBpcmVkIjp0cnVlLCJlbmFibGVkIjp0cnVlfSwic2NvcGUiOlsiRk9PIl0sImV4cCI6MTYwNDM5MjY3OSwiYXV0aG9yaXRpZXMiOlsiUkVBRCJdLCJqdGkiOiI1MDc3OWY1OS1lOGMwLTQ1ZDYtYjFkZC05MGFkODJlMGE0OTciLCJjbGllbnRfaWQiOiJ1c2Vyc2VydmljZTMifQ");
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		System.out.println(passwordEncoder.encode("1234"));
 
-		System.out.println(new String(bytes));
+		System.out.println(passwordEncoder.matches("writer", "$2a$10$Du3s4X6ufXGrHBPsUAH5Ie0S8UHroZDtcNB/oUfEdR5PSbKzK7hSi"));
+
+
+		String md5 = DigestUtils.md5DigestAsHex("writer".getBytes());
+		System.out.println("MD5加密:" + md5);
+
+
+		MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+		messageDigest.update("writer".getBytes());
+		String md52 = new BigInteger(1, messageDigest.digest()).toString(16);
+		System.out.println("MD5加密2:" + md52);
 
 	}
 

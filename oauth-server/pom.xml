@@ -58,7 +58,6 @@
                     <include>*.yml</include>
                     <include>*.txt</include>
                     <include>*.xml</include>
-                    <include>*.jks</include>
                     <include>*.pem</include>
                     <include>templates/**</include>
                 </includes>

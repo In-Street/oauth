@@ -54,14 +54,18 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	}
 
 	/**
-	 * 除 /user 下的请求都允许匿名访问
+	 * 1.不重写此方法时，默认拦截所有请求接口，接口方法不标注 @PreAuthorize("hasAuthority('READ') or hasAuthority('WRITE')") 所需权限时，只有read权限的账号也可以访问。
+	 * 2.除 /user 下的请求都允许匿名访问。
+	 * 3.注意 authenticated() 和 permitAll() 位置，决定matchers的接口是需要授权还是都可访问。
 	 * @param http
 	 * @throws Exception
 	 */
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 
-		http.authorizeRequests().antMatchers("/user/**").authenticated()
+		http.authorizeRequests()
+				.antMatchers("/user/**")
+				.authenticated()
 				.anyRequest().permitAll();
 	}
 

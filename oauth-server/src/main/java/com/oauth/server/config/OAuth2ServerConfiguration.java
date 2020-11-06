@@ -16,6 +16,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -75,14 +76,16 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 	/**
 	 * 打开验证Token访问权限；
 	 *
-	 * 允许ClientSecret明文方式保存，并且可以通过表单提交（而不仅仅是Basic Auth方式提交）
+	 * Client的client_secret以BCrypt加密，并且可以通过表单提交（而不仅仅是Basic Auth方式提交）
 	 * @param security
 	 * @throws Exception
 	 */
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 		security.checkTokenAccess("permitAll()")
-				.allowFormAuthenticationForClients().passwordEncoder(NoOpPasswordEncoder.getInstance());
+				.passwordEncoder(new BCryptPasswordEncoder())
+				//没有此设置的话，请求Header中添加 Authorization: Basic encoder 。encoder是  String str=用户名:密码, encoder = Base64 encoder(str)
+				.allowFormAuthenticationForClients();
 	}
 
 
@@ -153,10 +156,8 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 		return new DefaultWebResponseExceptionTranslator() {
 			@Override
 			public ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception {
-				// This is the line that prints the stack trace to the log. You can customise this to format the trace etc if you like
 				e.printStackTrace();
 
-				// Carry on handling the exception
 				ResponseEntity<OAuth2Exception> responseEntity = super.translate(e);
 				HttpHeaders headers = new HttpHeaders();
 				headers.setAll(responseEntity.getHeaders().toSingleValueMap());
