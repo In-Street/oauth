@@ -1,48 +1,39 @@
 server:
   port: 9092
+  servlet:
+    context-path: /app
+
 spring:
   application.name: oauth-client
   profiles.active: dev
-  security:
-    oauth2:
-      client:
-        clientId: userservice3
-        clientSecret: 1234
-        accessTokenUri: http://localhost:9090/oauth/token
-        userAuthorizationUri: http://localhost:9090/oauth/authorize
-        scope: FOO
-        grant-type: authorization_code
-      resource:
-        jwt:
-          key-value: |
-            -----BEGIN PUBLIC KEY-----
-            MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQB91naKSXe4pBfq/AQmDAdT
-            8A/wn5/9BrRo1YpIuj0Wh6g46CHL9Z/T457bETiTuBGsm7piZ8Is3T3gns4QSpRd
-            BmBvrne27SsAhmF99rle+Nvb5HkFn2+Q2tvkp5Fv2RlP9X2xE3WY7P1R+PDPYJUU
-            lN6ncuxP3LLwRb5sJyerOj4+XwIaW6mo9oDd21PgFm3bN6+RyDLjVakFj5K1IIRT
-            e0gOkyj72cr0spBf+zAfuG7j2ljdt9z0bKuHgWRV96fVG+bJj52cxcJrzYTQYVTV
-            dHgT3wbvINQ0FQEelp+9U/1UmdjTx+Wx7VNdoy46Xi558yxd8rZf5g1pAW0hqhxT
-            AgMBAAE=
-            -----END PUBLIC KEY-----
-#        provider:
-#          provider_one:
-#            #获取访问令牌
-#            tokenUri: http://localhost:9090/oauth/token
-#            #获取授权码
-#            authorizationUri: http://localhost:9090/oauth/authorize
-#        registration:
-#          provider: provider_one
-#          clientId: userservice3
-#          clientSecret: $2a$10$PMGjUnK3E9xyHUTkyGMPt.pGJARObmYXBToktBkB.2YRnLYvMYqfC
-#          scope: FOO
-#      resourceserver:
-#        jwt:
-#          public-key-location: pubkey.pem
   thymeleaf:
     cache: false
+
+security:
+  oauth2:
+    client:
+      client-id: userservice3
+      client-secret: 1234
+      access-token-uri: http://localhost:9090/oauth/token
+      user-authorization-uri: http://localhost:9090/oauth/authorize
+      scope: FOO
+
+    resource:
+      jwt:
+        key-value:
+          -----BEGIN PUBLIC KEY-----
+          MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQB91naKSXe4pBfq/AQmDAdT
+          8A/wn5/9BrRo1YpIuj0Wh6g46CHL9Z/T457bETiTuBGsm7piZ8Is3T3gns4QSpRd
+          BmBvrne27SsAhmF99rle+Nvb5HkFn2+Q2tvkp5Fv2RlP9X2xE3WY7P1R+PDPYJUU
+          lN6ncuxP3LLwRb5sJyerOj4+XwIaW6mo9oDd21PgFm3bN6+RyDLjVakFj5K1IIRT
+          e0gOkyj72cr0spBf+zAfuG7j2ljdt9z0bKuHgWRV96fVG+bJj52cxcJrzYTQYVTV
+          dHgT3wbvINQ0FQEelp+9U/1UmdjTx+Wx7VNdoy46Xi558yxd8rZf5g1pAW0hqhxT
+          AgMBAAE=
+          -----END PUBLIC KEY-----
 ---
 spring.profiles: dev
 
 # 指定log4j2作为日志记录
 logging:
   config: classpath:log4j2-9092.xml
+#  config: classpath:log4j2-9093.xml

@@ -12,7 +12,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Cheng Yufei
  * @create 2020-11-06 17:37
  **/
-@Configuration
+//@Configuration
+//@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
 
 
@@ -29,11 +30,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	 * 配置index路径的首页Controller
 	 * @param registry
 	 */
-	@Override
+	/*@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/")
 				.setViewName("forward:/index");
 
 		registry.addViewController("/index");
-	}
+	}*/
 }

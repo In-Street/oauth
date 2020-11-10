@@ -16,7 +16,6 @@ import java.util.Map;
  * @create 2020-11-06 17:21
  **/
 @RestController
-@RequestMapping("/client")
 public class ClientController {
 
 	@Autowired

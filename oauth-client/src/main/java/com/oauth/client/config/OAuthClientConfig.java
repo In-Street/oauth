@@ -16,8 +16,9 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 @EnableOAuth2Sso
 public class OAuthClientConfig {
 
-	@Bean(name="oAuth2RestTemplate")
-	public OAuth2RestTemplate init(OAuth2ClientContext oAuth2ClientContext, OAuth2ProtectedResourceDetails details){
-		return new OAuth2RestTemplate(details, oAuth2ClientContext);
+	@Bean(name = "oAuth2RestTemplate")
+	public OAuth2RestTemplate init(OAuth2ClientContext oAuth2ClientContext,OAuth2ProtectedResourceDetails resourceDetails) {
+		OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails, oAuth2ClientContext);
+		return oAuth2RestTemplate;
 	}
 }
