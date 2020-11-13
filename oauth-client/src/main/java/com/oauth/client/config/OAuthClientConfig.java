@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 
 /**
- *
  * @author Cheng Yufei
  * @create 2020-11-06 17:16
  **/
@@ -16,9 +15,9 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 @EnableOAuth2Sso
 public class OAuthClientConfig {
 
-	@Bean(name = "oAuth2RestTemplate")
-	public OAuth2RestTemplate init(OAuth2ClientContext oAuth2ClientContext,OAuth2ProtectedResourceDetails resourceDetails) {
-		OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails, oAuth2ClientContext);
-		return oAuth2RestTemplate;
-	}
+    @Bean(name = "oAuth2RestTemplate")
+    public OAuth2RestTemplate init(OAuth2ClientContext oAuth2ClientContext, OAuth2ProtectedResourceDetails resourceDetails) {
+        OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails, oAuth2ClientContext);
+        return oAuth2RestTemplate;
+    }
 }

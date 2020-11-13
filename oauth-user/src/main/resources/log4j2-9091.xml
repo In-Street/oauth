@@ -11,7 +11,7 @@
         <property name="LOG_PATTERN" value="%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
         <!-- 定义日志存储的路径，不要配置相对路径 -->
 <!--        <property name="FILE_PATH" value="D:/log" />-->
-        <property name="FILE_PATH" value="/data/Logs" />
+        <property name="FILE_PATH" value="/Users/chengyufei/Downloads/project/self/github/data/Logs" />
         <property name="FILE_NAME" value="oauth-user-9091" />
     </Properties>
 

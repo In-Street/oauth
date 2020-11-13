@@ -16,7 +16,7 @@ import org.springframework.context.annotation.PropertySource;
  **/
 @SpringBootApplication(scanBasePackages = {"com.oauth.server"})
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@PropertySource(value = {"file:D:/encrypt.properties"})
+@PropertySource(value = {"file:/Users/chengyufei/Downloads/project/self/encrypt.properties"})
 public class OAuthServerApplication {
 
 	@Value("${jasypt.encryptor.password}")
