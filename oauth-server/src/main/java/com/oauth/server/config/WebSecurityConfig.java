@@ -3,12 +3,14 @@ package com.oauth.server.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -55,7 +57,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * 自定义表单登录
-	 * and()：表示结束标签，上下文回到HttpSecurity，开启新一轮配置
+	 * 1.and()：表示结束标签，上下文回到HttpSecurity，开启新一轮配置;
+	 * 2.登录成功回调，【defaultSuccessUrl 、successForwardUrl，两个只设置一个属性即可】
+	 * 			a. defaultSuccessUrl：如果从登录地址访问，登录成功后跳转到指定地址，如果从其他地址/A访问，因未登录重定向到登录地址，登录成功后回跳转到原来的/A，而不是指定的地址。但当defaultSuccessUrl第二个参数设置为
+	 * 											true时，效果和successForwardUrl效果一致。
+	 *
+	 * 			b.successForwardUrl: 不管从哪个地址进行请求，登录成功后都会跳转到指定地址。
+	 *
+	 * 3. 登录失败回调：【 failureForwardUrl、failureUrl 】
+	 *		a. failureForwardUrl：登录失败之后会发生服务端跳转
+	 *		b. failureUrl: 登录失败之后，会发生重定向
+	 *
+	 * 3.登出接口默认: /logout
+	 * 		a. logoutRequestMatcher() ：不仅可以修改登出地址，还可以指定请求方式，和 logoutUrl() 选一个配置即可；
+	 *
+	 *
 	 * @throws Exception
 	 */
 	@Override
@@ -72,7 +88,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.defaultSuccessUrl("/demo/index")
 				.permitAll()
 
-				.and().logout().permitAll()
+				.and().logout()
+				//修改注销地址和请求方式
+				//.logoutRequestMatcher(new AntPathRequestMatcher("/logout", HttpMethod.POST.name()))
+				//注销成功后跳转
+				//.logoutSuccessUrl("")
+				//清除cookie
+				.deleteCookies()
+				.permitAll()
 				//关闭csrf
 				.and().csrf().disable();
 	}
