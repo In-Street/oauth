@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
@@ -24,26 +25,39 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
-	private TokenStore tokenStore;
+    @Autowired
+    private TokenStore tokenStore;
 
-	/**
-	 * 读权限或写权限可访问，返回登录用户信息
-	 *
-	 * @param authentication
-	 * @return
-	 */
-	@PreAuthorize("hasAuthority('READ') or hasAuthority('WRITE')")
-	@GetMapping("/read")
-	public Map read(OAuth2Authentication authentication) {
-		return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities());
-	}
+    /**
+     * 读权限或写权限可访问，返回登录用户信息
+     *
+     * @param authentication
+     * @return
+     */
+    //@PreAuthorize("hasAuthority('READ') or hasAuthority('WRITE')")
+    //@PreAuthorize("hasAnyRole('ROLE_READ','ROLE_WRITE')")
+    @PreAuthorize("hasRole('ROLE_READ')")
+    @GetMapping("/common/read")
+    public Map read(OAuth2Authentication authentication) {
+        return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities());
+    }
 
-	@PreAuthorize("hasAuthority('WRITE')")
-	@PostMapping("/write")
-	public Object write(OAuth2Authentication authentication) {
-		OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
-		OAuth2AccessToken token = tokenStore.readAccessToken(details.getTokenValue());
-		return token.getAdditionalInformation().getOrDefault("userDetails", null);
-	}
+    @PreAuthorize("hasAuthority('WRITE')")
+    //@PreAuthorize("hasRole('WRITE')")
+    @PostMapping("/common/write")
+    public Object write(OAuth2Authentication authentication) {
+        OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
+        OAuth2AccessToken token = tokenStore.readAccessToken(details.getTokenValue());
+        return token.getAdditionalInformation().getOrDefault("userDetail", null);
+    }
+
+    //@PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin")
+    public Map admin(OAuth2Authentication authentication) {
+        //最新用户信息可以从 SecurityContextHolder 中获取
+        Authentication authentication1 = SecurityContextHolder.getContext().getAuthentication();
+        return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities(),"isAuthenticated",authentication1.isAuthenticated()+">>>"+authentication1.getName());
+    }
+
 }

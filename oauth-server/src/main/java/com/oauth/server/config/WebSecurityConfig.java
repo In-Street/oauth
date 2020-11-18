@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,11 +16,18 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+
+//TODO BY Cheng Yufei <-2020-11-18 14:20->
+// logout退出后仍能访问接口、角色继承无效
+
+
 
 /**
  *
@@ -78,11 +88,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * 3.登出接口默认: /logout
      * 		a. logoutRequestMatcher() ：不仅可以修改登出地址，还可以指定请求方式，和 logoutUrl() 选一个配置即可；
      *
+     * 4. 若使用登录成功重定向时，如果用client的接口A进行访问的时，需要在 oauth_client_details 对应client的redirect_url添加A，否则成功后跳转回A，
      *
      * @throws Exception
      */
-    //@Override
-    protected void configure1(HttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests().anyRequest().authenticated()
                 //选定自己的login页面，登录相关的页面及接口不进行拦截;
                 //security会同时添加 GET：/login.html 接口访问页面 和 POST: /login.html接口接受登录表单提交，两个地址相同的接口；可通过 .loginProcessingUrl("")单独定义表单数据提交接口名称
@@ -104,7 +115,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies()
                 .permitAll()
                 //关闭csrf
-                .and().csrf().disable();
+                .and().csrf().disable()
+                .sessionManagement().maximumSessions(1);
     }
 
     /**
@@ -114,8 +126,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @param http
      * @throws Exception
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    //@Override
+    protected void configure1(HttpSecurity http) throws Exception {
         http.authorizeRequests().anyRequest().authenticated()
                 .and().formLogin().loginPage("/login.html")
                 .loginProcessingUrl("/doLogin")
@@ -173,6 +185,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     writer.close();
                 })
                 .deleteCookies()
+                .clearAuthentication(true)
+                .invalidateHttpSession(true)
                 .permitAll()
                 .and().csrf().disable()
         ;

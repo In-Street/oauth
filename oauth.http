@@ -41,19 +41,24 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtd
 
 
 ###
-GET {{url}}/user/read
-Accept: *
-Cache-Control: no-cache
-#Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJzY29wZSI6WyJGT08iXSwiZXhwIjoxNjA0NDAyMDEzLCJhdXRob3JpdGllcyI6WyJSRUFEIiwiV1JJVEUiXSwianRpIjoiYzFlNTYwMzYtNGI3NC00NGVlLThlYjQtM2ZmMmM4MDE3YjFiIiwiY2xpZW50X2lkIjoidXNlcnNlcnZpY2UyIn0.AkT8Ew5-TuDYZ5Psks6V__nBHDCVqL4PPG4viGCUARcF9THbl_ZIQLM7v6GbewLkO7JdA20x1HFd8L6o5l6IOIUpRoVEmsMbCi6m1UVGKlhd196kVLjLaf2w2LlMKBn-plZ-6GXq_JskcGdMPXSym-2-DsM0Fqe6r1jAxYBWxMqYlKimENq-LrAPCiClPztcoQQRpss3zEnmkSa-YjQNgYiY_p8Kt6nZfTnJfVvne0AlvJUf5RVunhyWhnASuVYFph1uyxs206SofZK0VdhSkLIuAP9BrorX5l5ISwKKZzwsG2lv7VIUTjGlfzSxB9yA2wOwtgOhhkpE9URnyOEoUA
-
-###
-POST {{url}}/user/write
+POST {{url}}/user/common/write
 Accept: application/json
 Cache-Control: no-cache
 #Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJ1c2VyX25hbWUiOiJyZWFkZXIiLCJ1c2VyRGV0YWlsIjp7InBhc3N3b3JkIjpudWxsLCJ1c2VybmFtZSI6InJlYWRlciIsImF1dGhvcml0aWVzIjpbeyJhdXRob3JpdHkiOiJSRUFEIn1dLCJhY2NvdW50Tm9uRXhwaXJlZCI6dHJ1ZSwiYWNjb3VudE5vbkxvY2tlZCI6dHJ1ZSwiY3JlZGVudGlhbHNOb25FeHBpcmVkIjp0cnVlLCJlbmFibGVkIjp0cnVlfSwic2NvcGUiOlsiRk9PIl0sImV4cCI6MTYwNDY2MDQyNywiYXV0aG9yaXRpZXMiOlsiUkVBRCJdLCJqdGkiOiIyZDc2OTM2MC1kZWUwLTRhMjctYjk3OS0xMjc1NTI5NDY0NzIiLCJjbGllbnRfaWQiOiJ1c2Vyc2VydmljZTMifQ.A4LJGhAgjhn2nNK2GCZWXNj0FpZNqDcFdJ3NIuUI-qwi9aw-yO8dEOEjnwRmIteIQCrika_PUEx4Qcq892fM_spG9rAM5apIRmlBsAMYdqKp0VFnvP3OgnkFdyIlSEJ_IeH3eUN3NikeIc78hAPLKSWXL1jelSoMntOSuyMR9oP6LdUv4_tDGTywisDnqy24uM2NIbs1gsliLjGTLN5vapG7LQWFFDVgA1RT0Z-ralx_B8Y0xNKookInNVD9ozxUqyP2qDytAth96UIYU4MA9II-QOkH7akwk5MH6A9gKa8w8rw24cbVphOgEqWCUGL8OWjrtpvbTjscwoDMd_eewg
 
 
 ###
-GET {{url}}/remoteApi
+POST {{url}}/doLogin?uname=writer&pwd=writer
 Accept: application/json
 Cache-Control: no-cache
+
+###
+GET {{url}}/logout
+Accept: */*
+Cache-Control: no-cache
+
+###
+GET {{url}}/remoteApi?type=write
+Accept: *
+Cache-Control: no-cache
+

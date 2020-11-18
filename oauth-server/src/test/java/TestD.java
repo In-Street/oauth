@@ -48,7 +48,7 @@ public class TestD {
 	public void password() throws NoSuchAlgorithmException {
 
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		System.out.println(passwordEncoder.encode("1234"));
+		System.out.println(passwordEncoder.encode("admin"));
 
 		System.out.println(passwordEncoder.matches("writer", "$2a$10$Du3s4X6ufXGrHBPsUAH5Ie0S8UHroZDtcNB/oUfEdR5PSbKzK7hSi"));
 
