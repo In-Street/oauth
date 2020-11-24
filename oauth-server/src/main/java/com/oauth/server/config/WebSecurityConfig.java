@@ -88,23 +88,37 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * 3.登出接口默认: /logout
      * 		a. logoutRequestMatcher() ：不仅可以修改登出地址，还可以指定请求方式，和 logoutUrl() 选一个配置即可；
      *
-     * 4. 若使用登录成功重定向时，如果用client的接口A进行访问的时，需要在 oauth_client_details 对应client的redirect_url添加A，否则成功后跳转回A，
+     * 4. 若使用登录成功重定向时，如果用client的接口A进行访问的时，需要在 oauth_client_details 对应client的redirect_url添加A，否则成功后跳转回A，此时在调用其他接口B后，返回不包含在redirect_url中，再次访问A也会返回
+     *     不包含在redirect_url中。
+     *
+     *  5. 记住我：
+     *         a.核心是存在cookie中的令牌，这个令牌突破了 session 的限制，即使服务器重启、浏览器关闭又重新打开，只要这个令牌没有过期，就能访问到数据。
+     *         b. cookie中携带 remember-me=xxxx, 的base64字符串。格式为：用户名:时间戳:MD5值。时间戳是一个两周后的毫秒值。
+     *              MD5的明文为：username + ":" + tokenExpiryTime + ":" + password + ":" + key。服务端解析cookie中的用户名和过期时间，根据用户名查找密码，MD5计算出散列值，和前端传过来的值比较，检验令牌是否有效。
      *
      * @throws Exception
      */
-    //@Override
-    protected void configure1(HttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests().anyRequest().authenticated()
                 //选定自己的login页面，登录相关的页面及接口不进行拦截;
                 //security会同时添加 GET：/login.html 接口访问页面 和 POST: /login.html接口接受登录表单提交，两个地址相同的接口；可通过 .loginProcessingUrl("")单独定义表单数据提交接口名称
-                .and().formLogin().loginPage("/login.html")
+                .and()
+                .formLogin()
+               /* .loginPage("/login.html")
                 .loginProcessingUrl("/doLogin")
                 //自定义页面中的用户名
                 .usernameParameter("uname")
                 .passwordParameter("pwd")
                 //登录成功后跳转地址
                 .defaultSuccessUrl("/demo/index")
-                .permitAll()
+                .permitAll()*/
+
+                //记住我
+                .and()
+                .rememberMe()
+                //key 默认值是一个 UUID 字符串，在服务重启后key会变，会导致之前的自动登录令牌失效，所以需要指定一个固定的key值。
+                .key("gameofthrones")
 
                 .and().logout()
                 //修改注销地址和请求方式
@@ -115,8 +129,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies()
                 .permitAll()
                 //关闭csrf
-                .and().csrf().disable()
-                .sessionManagement().maximumSessions(1);
+                .and().csrf().disable();
+                //.sessionManagement().maximumSessions(1);
     }
 
     /**
@@ -128,9 +142,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @param http
      * @throws Exception
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        //自定义登录的过滤器实现json传输用户名、密码
+    //@Override
+    protected void configure1(HttpSecurity http) throws Exception {
+        //自定义登录的过滤器实现json传输用户名、密码。代替UsernamePasswordAuthenticationFilter
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.authorizeRequests().anyRequest().authenticated()
                 .and()
@@ -200,8 +214,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 自定义过滤器：1. 需要设置登录成功、失败的情况。configure(HttpSecurity http) 方法中设置的 loginProcessingUrl、登录成功、失败的设置会无效。
-     *                      2.必须设置setFilterProcessesUrl("xxx") 登录接口，否则此过滤器无效，仍然会走原始的UsernamePasswordAuthenticationFilter。
+     * 自定义过滤器：1. 需要设置登录成功、失败的情况。configure(HttpSecurity http) 方法中 formLogin 相关设置的 loginProcessingUrl、登录成功、失败的设置会无效。
+     *                      2.如果登录接口有变化必须设置setFilterProcessesUrl("/doLogin") 登录接口，【默认是 /login】，否则此过滤器无效，仍然会走原始的UsernamePasswordAuthenticationFilter。
      * @return
      * @throws Exception
      */
@@ -225,7 +239,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             writer.println(objectNode.toString());
             writer.close();
         });
-        customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
+        //customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
         return customAuthenticationFilter;
 
     }
