@@ -48,17 +48,23 @@ Cache-Control: no-cache
 
 
 ###
-POST {{url}}/doLogin?uname=writer&pwd=writer
+POST {{url}}/doLogin
 Accept: application/json
 Cache-Control: no-cache
+Content-Type: application/json;charset=UTF-8
+
+{
+  "uname": "admin",
+  "pwd": "admin"
+}
 
 ###
 GET {{url}}/logout
 Accept: */*
 Cache-Control: no-cache
 
-###
-GET {{url}}/remoteApi?type=write
+### client 访问资源服务器接口
+GET {{url}}/remoteApi?type=read
 Accept: *
 Cache-Control: no-cache
 

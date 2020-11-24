@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
+ *@PreAuthorize("hasRole()"),使用hasRole的话，数据库中的authorities表中需设置为 ROLE_ 开头的角色
  *
  * @author Cheng Yufei
  * @create 2020-11-02 15:23
@@ -35,8 +36,9 @@ public class UserController {
      * @return
      */
     //@PreAuthorize("hasAuthority('READ') or hasAuthority('WRITE')")
+    @PreAuthorize("hasAnyAuthority('READ','WRITE')")
     //@PreAuthorize("hasAnyRole('ROLE_READ','ROLE_WRITE')")
-    @PreAuthorize("hasRole('ROLE_READ')")
+    //@PreAuthorize("hasRole('ROLE_READ')")
     @GetMapping("/common/read")
     public Map read(OAuth2Authentication authentication) {
         return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities());
@@ -51,8 +53,8 @@ public class UserController {
         return token.getAdditionalInformation().getOrDefault("userDetail", null);
     }
 
-    //@PreAuthorize("hasAuthority('ADMIN')")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin")
     public Map admin(OAuth2Authentication authentication) {
         //最新用户信息可以从 SecurityContextHolder 中获取

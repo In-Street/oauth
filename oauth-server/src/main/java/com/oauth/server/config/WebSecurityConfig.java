@@ -19,6 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
@@ -26,7 +27,6 @@ import java.io.PrintWriter;
 
 //TODO BY Cheng Yufei <-2020-11-18 14:20->
 // logout退出后仍能访问接口、角色继承无效
-
 
 
 /**
@@ -92,8 +92,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      *
      * @throws Exception
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    //@Override
+    protected void configure1(HttpSecurity http) throws Exception {
         http.authorizeRequests().anyRequest().authenticated()
                 //选定自己的login页面，登录相关的页面及接口不进行拦截;
                 //security会同时添加 GET：/login.html 接口访问页面 和 POST: /login.html接口接受登录表单提交，两个地址相同的接口；可通过 .loginProcessingUrl("")单独定义表单数据提交接口名称
@@ -120,41 +120,47 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 登录成功后返回用户信息 ,利用 successHandler ，参数中的request 可以实现服务端的直接跳转【request.getRequestDispatcher().forward()，客户端请求地址不发生变化，由服务器去请求另一个资源，返回前端】,
+     * 1.登录成功后返回用户信息 ,利用 successHandler ，参数中的request 可以实现服务端的直接跳转【request.getRequestDispatcher().forward()，客户端请求地址不发生变化，由服务器去请求另一个资源，返回前端】,
      * 参数中的response 可以实现客户端间接跳转【response.sendRedirect()，客户端会根据地址再次进行请求，总共发出两次http请求】,也可以返回json数据。
+     *
+     * 2. 使用接口访问 /doLogin 接口登录时，默认只能用地址后面拼接 /doLogin?uname=admin&pwd=admin 进行用户名和密码的传递，可通过自定义过滤器来实现通过json传递
      *
      * @param http
      * @throws Exception
      */
-    //@Override
-    protected void configure1(HttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        //自定义登录的过滤器实现json传输用户名、密码
+        http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.authorizeRequests().anyRequest().authenticated()
-                .and().formLogin().loginPage("/login.html")
-                .loginProcessingUrl("/doLogin")
-                .usernameParameter("uname")
-                .passwordParameter("pwd")
+                .and()
+               .formLogin()
+                  //.loginPage("/login.html")
+                 //.loginProcessingUrl("/doLogin")
+                 //.usernameParameter("uname")
+                 //.passwordParameter("pwd")
 
                 //登录成功处理
-                .successHandler((request, response, authentication) -> {
-                    Object principal = authentication.getPrincipal();
-                    response.setContentType("application/json; charset=UTF-8");
-                    PrintWriter writer = response.getWriter();
-                    writer.write(objectMapper.writeValueAsString(principal));
-                    writer.close();
-                })
+                /*  .successHandler((request, response, authentication) -> {
+                      Object principal = authentication.getPrincipal();
+                      response.setContentType("application/json; charset=UTF-8");
+                      PrintWriter writer = response.getWriter();
+                      writer.write(objectMapper.writeValueAsString(principal));
+                      writer.close();
+                  })
 
                 //处理登录失败
-                .failureHandler((request, response, authenticationException) -> {
-                    response.setContentType("application/json; charset=UTF-8");
-                    PrintWriter writer = response.getWriter();
-                    //writer.write(authenticationException.getMessage());
-                    ObjectNode objectNode = objectMapper.createObjectNode();
-                    objectNode.put("code", -1);
-                    objectNode.put("msg", "用户名或密码错误");
-                    writer.println(objectNode.toString());
-                    writer.close();
-                })
-                .permitAll()
+                  .failureHandler((request, response, authenticationException) -> {
+                      response.setContentType("application/json; charset=UTF-8");
+                      PrintWriter writer = response.getWriter();
+                      //writer.write(authenticationException.getMessage());
+                      ObjectNode objectNode = objectMapper.createObjectNode();
+                      objectNode.put("code", -1);
+                      objectNode.put("msg", "用户名或密码错误");
+                      writer.println(objectNode.toString());
+                      writer.close();
+                  })
+                .permitAll()*/
 
                 //设置未认证情况, 提示未登录信息，否则默认是重定向到登录页
                 .and()
@@ -190,5 +196,38 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and().csrf().disable()
         ;
+
     }
+
+    /**
+     * 自定义过滤器：1. 需要设置登录成功、失败的情况。configure(HttpSecurity http) 方法中设置的 loginProcessingUrl、登录成功、失败的设置会无效。
+     *                      2.必须设置setFilterProcessesUrl("xxx") 登录接口，否则此过滤器无效，仍然会走原始的UsernamePasswordAuthenticationFilter。
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    CustomAuthenticationFilter customAuthenticationFilter() throws Exception {
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter();
+        customAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+        customAuthenticationFilter.setAuthenticationSuccessHandler((request, response, authentication) -> {
+            Object principal = authentication.getPrincipal();
+            response.setContentType("application/json; charset=UTF-8");
+            PrintWriter writer = response.getWriter();
+            writer.write(objectMapper.writeValueAsString(principal));
+            writer.close();
+        });
+        customAuthenticationFilter.setAuthenticationFailureHandler((request, response, authenticationException) -> {
+            response.setContentType("application/json; charset=UTF-8");
+            PrintWriter writer = response.getWriter();
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put("code", -1);
+            objectNode.put("msg", "用户名或密码错误");
+            writer.println(objectNode.toString());
+            writer.close();
+        });
+        customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
+        return customAuthenticationFilter;
+
+    }
+
 }
