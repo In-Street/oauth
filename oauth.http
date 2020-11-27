@@ -67,4 +67,9 @@ Cache-Control: no-cache
 GET {{url}}/remoteApi?type=read
 Accept: *
 Cache-Control: no-cache
+Cookie: remember-me=bnlWZWJiOTVSRm1qTEQxSWNVVkpqQSUzRCUzRDozRVFLUjcycDU1VUVnUXdkS2pxWUxnJTNEJTNE
 
+###
+GET {{url}}/produceCode
+Accept: */*
+Cache-Control: no-cache

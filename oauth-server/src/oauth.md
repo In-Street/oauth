@@ -19,6 +19,22 @@
 需将 http://localhost:9092/app/remoteApi 添加到表。
 ```
 
+### 认证流程
+Authentication 接口:
+
+1.定义了一些方法获取用户的相关内容
+```
+getAuthorities 方法用来获取用户的权限。
+getCredentials 方法用来获取用户凭证，一般来说就是密码。
+getDetails 方法用来获取用户携带的详细信息，可能是当前请求之类的东西。
+getPrincipal 方法用来获取当前用户，可能是一个用户名，也可能是一个用户对象。
+isAuthenticated 当前用户是否认证成功。
+```
+2. 多个实现类中常用UsernamePasswordAuthenticationToken、RememberMeAuthenticationToken。每个Authentication都有AuthenticationProvider去处理校验。UsernamePasswordAuthenticationToken用
+    DaoAuthenticationProvider来实现用户名、密码的登录校验，其中的support方法来判断AuthenticationProvider是否支持当前的的Authentication。
+    
+3. 一次完成的认证流程包含多个AuthenticationProvider，他们由ProviderManager进行管理。 ProviderManager # authenticate 方法逐个遍历 AuthenticationProvider # authenticate 方法认证。
+
+4. 自定义过滤器【验证码检验】会破坏原有的spring security 过滤链，可通过认证流程分析，采用自定义AuthenticationProvider 来代替DaoAuthenticationProvider，重写 additionalAuthenticationChecks 方法添加验证码检验功能即可。
 
 
-http://localhost:9092/app/login,http://localhost:9092/app/remoteApi,http://localhost:9093/app/login,http://localhost:9093/app/remoteApi
