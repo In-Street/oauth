@@ -45,6 +45,7 @@ public class WebSecurityConfigTwo extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
+                //获取验证码接口无需校验
                 .antMatchers("/demo/produceCode**").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin()

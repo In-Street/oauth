@@ -22,8 +22,9 @@ Cache-Control: no-cache
 
 ###
 POST {{url}}/login?username=reader&password=reader
-Accept: */*
+Accept: application/json
 Cache-Control: no-cache
+
 
 
 ### 获取授权码,需要浏览器访问，库中设置autoapprove：false 非自动授权，账号登录后需要手动点击授权

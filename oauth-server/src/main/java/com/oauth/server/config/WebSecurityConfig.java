@@ -79,7 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
    /**
      * 自定义表单登录
      * 1.and()：表示结束标签，上下文回到HttpSecurity，开启新一轮配置;
-     * 2.登录成功回调，发生重定向，【defaultSuccessUrl 、successForwardUrl，两个只设置一个属性即可】
+     * 2.登录成功回调，发生重定向，【defaultSuccessUrl 、successForwardUrl，两个只设置一个属性即可。不设置的话会找index.html】
      * 			a. defaultSuccessUrl：如果从登录地址访问，登录成功后跳转到指定地址，如果从其他地址/A访问，因未登录重定向到登录地址，登录成功后回跳转到原来的/A，而不是指定的地址。但当defaultSuccessUrl第二个参数设置为
      * 											true时，效果和successForwardUrl效果一致。
      *
@@ -250,7 +250,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             writer.println(objectNode.toString());
             writer.close();
         });
-        //customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
+        customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
         return customAuthenticationFilter;
 
     }
