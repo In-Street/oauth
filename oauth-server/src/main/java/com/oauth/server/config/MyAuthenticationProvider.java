@@ -1,6 +1,7 @@
 package com.oauth.server.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -24,9 +25,7 @@ public class MyAuthenticationProvider extends DaoAuthenticationProvider {
         String code = servletRequest.getParameter("code");
         String verify_code = (String) servletRequest.getSession().getAttribute("verify_code");
         if (!StringUtils.equals(code, verify_code)) {
-            throw new BadCredentialsException(messages.getMessage(
-                    "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                    "Bad credentials"));
+            throw new AuthenticationServiceException("验证码错误");
         }
         super.additionalAuthenticationChecks(userDetails, authentication);
     }

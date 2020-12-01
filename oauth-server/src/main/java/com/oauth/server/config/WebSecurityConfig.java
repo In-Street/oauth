@@ -2,6 +2,7 @@ package com.oauth.server.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +37,7 @@ import java.io.PrintWriter;
  * @author Cheng Yufei
  * @create 2020-10-29 16:15
  **/
-/*@Configuration
+@Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
@@ -51,12 +52,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    *//**
+    /**
      * 配置用户认证方式 - 数据库方式；
      * BCryptPasswordEncoder方式保存用户密码
      * @param auth
      * @throws Exception
-     *//*
+     *
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication()
@@ -64,17 +66,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(new BCryptPasswordEncoder());
     }
 
-    *//**
+    /**
      * 自定义表单登录,忽略一些静态文件
      * @param web
      * @throws Exception
-     *//*
+     */
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/js/**", "/css/**", "/images/**");
     }
 
-    *//**
+   /**
      * 自定义表单登录
      * 1.and()：表示结束标签，上下文回到HttpSecurity，开启新一轮配置;
      * 2.登录成功回调，发生重定向，【defaultSuccessUrl 、successForwardUrl，两个只设置一个属性即可】
@@ -97,27 +99,28 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      *         a.核心是存在cookie中的令牌，这个令牌突破了 session 的限制，即使服务器重启、浏览器关闭又重新打开，只要这个令牌没有过期，就能访问到数据。
      *         b. cookie中携带 remember-me=xxxx, 的base64字符串。格式为：用户名:时间戳:MD5值。时间戳是一个两周后的毫秒值。
      *              MD5的明文为：username + ":" + tokenExpiryTime + ":" + password + ":" + key。服务端解析cookie中的用户名和过期时间，根据用户名查找密码，MD5计算出散列值，和前端传过来的值比较，检验令牌是否有效。
-     *
      * @throws Exception
-     *//*
+     */
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 //fullyAuthenticated 无效，待研究
-                //.antMatchers("/app/remoteApi/write").fullyAuthenticated()
+                .antMatchers("/user/common/read").fullyAuthenticated()
                 .anyRequest().authenticated()
                 //选定自己的login页面，登录相关的页面及接口不进行拦截;
                 //security会同时添加 GET：/login.html 接口访问页面 和 POST: /login.html接口接受登录表单提交，两个地址相同的接口；可通过 .loginProcessingUrl("")单独定义表单数据提交接口名称
                 .and()
                 .formLogin()
-               *//* .loginPage("/login.html")
+              /*  .loginPage("/login.html")
                 .loginProcessingUrl("/doLogin")
                 //自定义页面中的用户名
                 .usernameParameter("uname")
                 .passwordParameter("pwd")
                 //登录成功后跳转地址
-                .defaultSuccessUrl("/demo/index")*//*
-                //.permitAll()
+                .defaultSuccessUrl("/demo/index")
+                //跳转自定义登录页等需要添加permitAll()
+                .permitAll()*/
 
                 //记住我功能，自动登录
                 .and()
@@ -139,7 +142,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //.sessionManagement().maximumSessions(1);
     }
 
-    *//**
+    /**
      * 1.登录成功后返回用户信息 ,利用 successHandler ，参数中的request 可以实现服务端的直接跳转【request.getRequestDispatcher().forward()，客户端请求地址不发生变化，由服务器去请求另一个资源，返回前端】,
      * 参数中的response 可以实现客户端间接跳转【response.sendRedirect()，客户端会根据地址再次进行请求，总共发出两次http请求】,也可以返回json数据。
      *
@@ -147,7 +150,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      *
      * @param http
      * @throws Exception
-     *//*
+     */
+
     //@Override
     protected void configure1(HttpSecurity http) throws Exception {
         //自定义登录的过滤器实现json传输用户名、密码。代替UsernamePasswordAuthenticationFilter
@@ -161,16 +165,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                  //.passwordParameter("pwd")
 
                 //登录成功处理
-                *//*  .successHandler((request, response, authentication) -> {
+              /*    .successHandler((request, response, authentication) -> {
                       Object principal = authentication.getPrincipal();
                       response.setContentType("application/json; charset=UTF-8");
                       PrintWriter writer = response.getWriter();
                       writer.write(objectMapper.writeValueAsString(principal));
                       writer.close();
-                  })
+                  })*/
 
                 //处理登录失败
-                  .failureHandler((request, response, authenticationException) -> {
+                 /* .failureHandler((request, response, authenticationException) -> {
                       response.setContentType("application/json; charset=UTF-8");
                       PrintWriter writer = response.getWriter();
                       //writer.write(authenticationException.getMessage());
@@ -179,8 +183,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                       objectNode.put("msg", "用户名或密码错误");
                       writer.println(objectNode.toString());
                       writer.close();
-                  })
-                .permitAll()*//*
+                  })*/
+                .permitAll()
 
                 //设置未认证情况, 提示未登录信息，否则默认是重定向到登录页
                 .and()
@@ -219,12 +223,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
-    *//**
+    /**
      * 自定义过滤器：1. 需要设置登录成功、失败的情况。configure(HttpSecurity http) 方法中 formLogin 相关设置的 loginProcessingUrl、登录成功、失败的设置会无效。
      *                      2.如果登录接口有变化必须设置setFilterProcessesUrl("/doLogin") 登录接口，【默认是 /login】，否则此过滤器无效，仍然会走原始的UsernamePasswordAuthenticationFilter。
      * @return
      * @throws Exception
-     *//*
+     */
+
     @Bean
     CustomAuthenticationFilter customAuthenticationFilter() throws Exception {
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter();
@@ -250,10 +255,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
-    *//**
+    /**
      * jdbc 记录 remember me 的令牌信息
      * @return
-     *//*
+     */
+
     @Bean(name="persistentTokenRepository")
     public PersistentTokenRepository persistentTokenRepository(){
         JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
@@ -261,4 +267,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return jdbcTokenRepository;
     }
 
-}*/
+}
