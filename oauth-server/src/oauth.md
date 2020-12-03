@@ -38,3 +38,8 @@ isAuthenticated 当前用户是否认证成功。
 4. 自定义过滤器【验证码检验】会破坏原有的spring security 过滤链，可通过认证流程分析，采用自定义AuthenticationProvider 来代替DaoAuthenticationProvider，重写 additionalAuthenticationChecks 方法添加验证码检验功能即可。
 
 
+###TODO
+1.logout退出后仍能访问接口、
+2.角色继承无效、
+3.指定接口使用fullyAuthenticated 无效,仍能通过remember me 用户进行访问。
+4. 在client模块中自定义WebSecurity的Order导致的过滤链顺序问题,与@EnableOAuth2Sso

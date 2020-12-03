@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,7 +60,12 @@ public class UserController {
     public Map admin(OAuth2Authentication authentication) {
         //最新用户信息可以从 SecurityContextHolder 中获取
         Authentication authentication1 = SecurityContextHolder.getContext().getAuthentication();
-        return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities(),"isAuthenticated",authentication1.isAuthenticated()+">>>"+authentication1.getName());
+        //获取ip、sessionid或token信息
+        Object details = authentication1.getDetails();
+
+        return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities(), "isAuthenticated",
+                authentication1.isAuthenticated() + ">>>" + authentication1.getName(),
+                "ip-sessionid", details);
     }
 
 }

@@ -56,8 +56,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     public void configure(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
-                .antMatchers("/user/common/read").fullyAuthenticated()
-                .antMatchers("/common/write","/admin")
+                .antMatchers("/user/**")
                 .authenticated()
                 .anyRequest().permitAll();
     }

@@ -20,11 +20,6 @@ Accept: application/json
 Cache-Control: no-cache
 #Authorization: Basic dXNlcnNlcnZpY2UyOjEyMzQ=
 
-###
-POST {{url}}/login?username=reader&password=reader
-Accept: application/json
-Cache-Control: no-cache
-
 
 
 ### 获取授权码,需要浏览器访问，库中设置autoapprove：false 非自动授权，账号登录后需要手动点击授权
@@ -45,7 +40,7 @@ Cache-Control: no-cache
 POST {{url}}/user/common/write
 Accept: application/json
 Cache-Control: no-cache
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJ1c2VyX25hbWUiOiJ3cml0ZXIiLCJ1c2VyRGV0YWlsIjp7InBhc3N3b3JkIjpudWxsLCJ1c2VybmFtZSI6IndyaXRlciIsImF1dGhvcml0aWVzIjpbeyJhdXRob3JpdHkiOiJSRUFELFdSSVRFIn1dLCJhY2NvdW50Tm9uRXhwaXJlZCI6dHJ1ZSwiYWNjb3VudE5vbkxvY2tlZCI6dHJ1ZSwiY3JlZGVudGlhbHNOb25FeHBpcmVkIjp0cnVlLCJlbmFibGVkIjp0cnVlfSwic2NvcGUiOlsiRk9PIl0sImV4cCI6MTYwNjgxNDk2MCwiYXV0aG9yaXRpZXMiOlsiUkVBRCxXUklURSJdLCJqdGkiOiJlM2E5YmIzNC02Y2Y1LTQ4YzEtYmM2ZS1iY2MzOTFkNjQxYjYiLCJjbGllbnRfaWQiOiJ1c2Vyc2VydmljZTMifQ.VxO30e_vPLRhPXMtiinth4Qs5kv4QXZG3PIRv4Qpucjy46oGdscgEPpKvjEKiIyqYqhxV4Hh61VEsJ3u5mb1gUJe7cRrInQ2MEeLm6lQD1ZkIkE6eSodmdru9C_pz1UoM4xAoP7pDY1GitL9KFlgrP1XtK6f8iQyrLADhx99D7hRveCi5Y6Fh_SDmGdKMyzLGTj8EknBGCip4jV9YRzTjcqJvqqaayKA8djNO12ccz7h1ix-NJ6iWdRg7S-3cO71w6vebMKg6VTn-43y7cODnC6jn45eyBMhTPPBsDppRUR51_gJXVUxafb0Lc1e2jUz4gho1dnLbphBJhndlF0iyw
+#Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsib2F1dGgtdXNlciJdLCJ1c2VyX25hbWUiOiJ3cml0ZXIiLCJ1c2VyRGV0YWlsIjp7InBhc3N3b3JkIjpudWxsLCJ1c2VybmFtZSI6IndyaXRlciIsImF1dGhvcml0aWVzIjpbeyJhdXRob3JpdHkiOiJSRUFELFdSSVRFIn1dLCJhY2NvdW50Tm9uRXhwaXJlZCI6dHJ1ZSwiYWNjb3VudE5vbkxvY2tlZCI6dHJ1ZSwiY3JlZGVudGlhbHNOb25FeHBpcmVkIjp0cnVlLCJlbmFibGVkIjp0cnVlfSwic2NvcGUiOlsiRk9PIl0sImV4cCI6MTYwNjgxNDk2MCwiYXV0aG9yaXRpZXMiOlsiUkVBRCxXUklURSJdLCJqdGkiOiJlM2E5YmIzNC02Y2Y1LTQ4YzEtYmM2ZS1iY2MzOTFkNjQxYjYiLCJjbGllbnRfaWQiOiJ1c2Vyc2VydmljZTMifQ.VxO30e_vPLRhPXMtiinth4Qs5kv4QXZG3PIRv4Qpucjy46oGdscgEPpKvjEKiIyqYqhxV4Hh61VEsJ3u5mb1gUJe7cRrInQ2MEeLm6lQD1ZkIkE6eSodmdru9C_pz1UoM4xAoP7pDY1GitL9KFlgrP1XtK6f8iQyrLADhx99D7hRveCi5Y6Fh_SDmGdKMyzLGTj8EknBGCip4jV9YRzTjcqJvqqaayKA8djNO12ccz7h1ix-NJ6iWdRg7S-3cO71w6vebMKg6VTn-43y7cODnC6jn45eyBMhTPPBsDppRUR51_gJXVUxafb0Lc1e2jUz4gho1dnLbphBJhndlF0iyw
 
 
 ###server 端获取登录验证码
@@ -54,7 +49,7 @@ Accept: */*
 Cache-Control: no-cache
 
 ### 自定义json登录并加验证码
-POST {{url}}/doLogin?code=3614
+POST {{url}}/doLogin
 Accept: application/json
 Cache-Control: no-cache
 Content-Type: application/json;charset=UTF-8
@@ -70,7 +65,12 @@ Accept: */*
 Cache-Control: no-cache
 
 ### client 访问资源服务器接口
-GET {{url}}/remoteApi/read
+GET {{url}}/remoteApi/admin
 Accept: *
+Cache-Control: no-cache
+
+###
+GET {{url}}/no/free
+Accept: */*
 Cache-Control: no-cache
 

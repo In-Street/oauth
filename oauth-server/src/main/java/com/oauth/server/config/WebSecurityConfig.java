@@ -23,6 +23,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
@@ -102,8 +103,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @throws Exception
      */
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    //@Override
+    protected void configure1(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 //fullyAuthenticated 无效，待研究
                 .antMatchers("/user/common/read").fullyAuthenticated()
@@ -112,15 +113,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //security会同时添加 GET：/login.html 接口访问页面 和 POST: /login.html接口接受登录表单提交，两个地址相同的接口；可通过 .loginProcessingUrl("")单独定义表单数据提交接口名称
                 .and()
                 .formLogin()
-              /*  .loginPage("/login.html")
-                .loginProcessingUrl("/doLogin")
-                //自定义页面中的用户名
-                .usernameParameter("uname")
-                .passwordParameter("pwd")
-                //登录成功后跳转地址
-                .defaultSuccessUrl("/demo/index")
-                //跳转自定义登录页等需要添加permitAll()
-                .permitAll()*/
+                /*  .loginPage("/login.html")
+                  .loginProcessingUrl("/doLogin")
+                  //自定义页面中的用户名
+                  .usernameParameter("uname")
+                  .passwordParameter("pwd")
+                  //登录成功后跳转地址
+                  .defaultSuccessUrl("/demo/index")
+                  //跳转自定义登录页等需要添加permitAll()
+                  .permitAll()*/
 
                 //记住我功能，自动登录
                 .and()
@@ -138,8 +139,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies()
                 .permitAll()
                 //关闭csrf
-                .and().csrf().disable();
-                //.sessionManagement().maximumSessions(1);
+                .and().csrf().disable()
+                //允许同一账号多端登录时【多端情况下输入完用户名、密码可以登录成功】，此设置禁止同一用户多端登录，一端登录另一段会强制下线
+                .sessionManagement().maximumSessions(1)
+                //禁止同一账号的多端登录【在输入完用户名、密码后直接提示登录不了】，不允许有同一账号的新登录
+                .maxSessionsPreventsLogin(true)
+                ;
     }
 
     /**
@@ -152,8 +157,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @throws Exception
      */
 
-    //@Override
-    protected void configure1(HttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         //自定义登录的过滤器实现json传输用户名、密码。代替UsernamePasswordAuthenticationFilter
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.authorizeRequests().anyRequest().authenticated()
@@ -219,6 +224,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .permitAll()
                 .and().csrf().disable()
+                .sessionManagement().maximumSessions(1)
+                //禁止同一账号的多端登录【在输入完用户名、密码后直接提示登录不了】，不允许有同一账号的新登录
+                .maxSessionsPreventsLogin(true)
         ;
 
     }
@@ -229,7 +237,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @return
      * @throws Exception
      */
-
     @Bean
     CustomAuthenticationFilter customAuthenticationFilter() throws Exception {
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter();
@@ -252,14 +259,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         });
         customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
         return customAuthenticationFilter;
-
     }
 
     /**
      * jdbc 记录 remember me 的令牌信息
      * @return
      */
-
     @Bean(name="persistentTokenRepository")
     public PersistentTokenRepository persistentTokenRepository(){
         JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
@@ -267,4 +272,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return jdbcTokenRepository;
     }
 
+    /**
+     * 1.设置这个Bean目的是为了在设置了.maxSessionsPreventsLogin(true)来禁止同一账号的新登录情况时，已登录用户在logout后，另一段可以马上进行登录。
+     *  否则感知不到已注销，另一端也无法及时可以登录。
+     *
+     *  2. 在spring security 中，通过监听session销毁事件，来及时清理session记录。默认的失效是通过调用 StandardSession#invalidate 方法来实现的，
+     *     这一个失效事件无法被 Spring 容器感知到，进而导致当用户注销登录之后，Spring Security 没有及时清理会话信息表，以为用户还在线，进而导致用户无法重新登录进来。
+     * @return
+     */
+   @Bean(name="httpSessionEventPublisher")
+   public HttpSessionEventPublisher httpSessionEventPublisher(){
+       return new HttpSessionEventPublisher();
+   }
 }

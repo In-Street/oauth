@@ -1,7 +1,9 @@
 package com.oauth.client.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
@@ -11,7 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * @create 2020-11-06 15:53
  **/
 //@Configuration
-//@Order(101)
+//@Order(99)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
@@ -20,10 +22,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @param http
 	 * @throws Exception
 	 */
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
-				.antMatchers("/", "/login**","/produceCode")
-				.permitAll().anyRequest().authenticated();
+	//@Override
+	protected void configure1(HttpSecurity http) throws Exception {
+		http
+				/*.antMatcher("/remoteApi/**")
+				.authorizeRequests()
+				.anyRequest().authenticated()*/
+				.authorizeRequests()
+				.antMatchers("/no/free").permitAll()
+				.anyRequest().authenticated()
+				.and().csrf().disable();
 	}
+
+
 }
