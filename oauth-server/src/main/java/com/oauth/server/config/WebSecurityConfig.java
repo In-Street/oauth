@@ -2,6 +2,7 @@ package com.oauth.server.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,16 +18,27 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
+import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.session.SessionInformationExpiredEvent;
+import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 //TODO BY Cheng Yufei <-2020-11-18 14:20->
@@ -77,7 +89,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/js/**", "/css/**", "/images/**");
     }
 
-   /**
+    /**
      * 自定义表单登录
      * 1.and()：表示结束标签，上下文回到HttpSecurity，开启新一轮配置;
      * 2.登录成功回调，发生重定向，【defaultSuccessUrl 、successForwardUrl，两个只设置一个属性即可。不设置的话会找index.html】
@@ -144,7 +156,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().maximumSessions(1)
                 //禁止同一账号的多端登录【在输入完用户名、密码后直接提示登录不了】，不允许有同一账号的新登录
                 .maxSessionsPreventsLogin(true)
-                ;
+        ;
     }
 
     /**
@@ -159,43 +171,60 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+        //因为使用customAuthenticationFilter取代UsernamePasswordAuthenticationFilter，
+        // 且ConcurrentSessionFilter 用到了SessionRegistryImpl，所以需要重新设置ConcurrentSessionFilter，使用自定义的SessionRegistry及信息返回
+        http.addFilterAt(new ConcurrentSessionFilter(sessionRegistryImpl(), strategy -> {
+            HttpServletResponse response = strategy.getResponse();
+            response.setContentType("application/json;charset=UTF-8");
+            PrintWriter writer = response.getWriter();
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put("code", -1);
+            objectNode.put("msg", "账号在另一台设备登录，本次登录下线");
+            writer.println(objectNode.toString());
+            writer.close();
+        }), ConcurrentSessionFilter.class);
+
         //自定义登录的过滤器实现json传输用户名、密码。代替UsernamePasswordAuthenticationFilter
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.authorizeRequests().anyRequest().authenticated()
+
+        http.authorizeRequests()
+                .antMatchers("/demo/produceCode").permitAll()
+                .anyRequest().authenticated()
                 .and()
-               .formLogin()
-                  //.loginPage("/login.html")
-                 //.loginProcessingUrl("/doLogin")
-                 //.usernameParameter("uname")
-                 //.passwordParameter("pwd")
+                .formLogin()
+                //.loginPage("/login.html")
+                //.loginProcessingUrl("/doLogin")
+                //.usernameParameter("uname")
+                //.passwordParameter("pwd")
 
                 //登录成功处理
-              /*    .successHandler((request, response, authentication) -> {
-                      Object principal = authentication.getPrincipal();
-                      response.setContentType("application/json; charset=UTF-8");
-                      PrintWriter writer = response.getWriter();
-                      writer.write(objectMapper.writeValueAsString(principal));
-                      writer.close();
-                  })*/
+                /*    .successHandler((request, response, authentication) -> {
+                        Object principal = authentication.getPrincipal();
+                        response.setContentType("application/json; charset=UTF-8");
+                        PrintWriter writer = response.getWriter();
+                        writer.write(objectMapper.writeValueAsString(principal));
+                        writer.close();
+                    })*/
 
                 //处理登录失败
-                 /* .failureHandler((request, response, authenticationException) -> {
-                      response.setContentType("application/json; charset=UTF-8");
-                      PrintWriter writer = response.getWriter();
-                      //writer.write(authenticationException.getMessage());
-                      ObjectNode objectNode = objectMapper.createObjectNode();
-                      objectNode.put("code", -1);
-                      objectNode.put("msg", "用户名或密码错误");
-                      writer.println(objectNode.toString());
-                      writer.close();
-                  })*/
+                /* .failureHandler((request, response, authenticationException) -> {
+                     response.setContentType("application/json; charset=UTF-8");
+                     PrintWriter writer = response.getWriter();
+                     //writer.write(authenticationException.getMessage());
+                     ObjectNode objectNode = objectMapper.createObjectNode();
+                     objectNode.put("code", -1);
+                     objectNode.put("msg", "用户名或密码错误");
+                     writer.println(objectNode.toString());
+                     writer.close();
+                 })*/
                 .permitAll()
 
                 //设置未认证情况, 提示未登录信息，否则默认是重定向到登录页
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, authenticationException) -> {
-                    response.setContentType("application/json; charset=UTF-8");
+                    response.setContentType("application/json;charset=UTF-8");
                     PrintWriter writer = response.getWriter();
                     //writer.write(authenticationException.getMessage());
                     ObjectNode objectNode = objectMapper.createObjectNode();
@@ -224,15 +253,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .permitAll()
                 .and().csrf().disable()
-                .sessionManagement().maximumSessions(1)
-                //禁止同一账号的多端登录【在输入完用户名、密码后直接提示登录不了】，不允许有同一账号的新登录
-                .maxSessionsPreventsLogin(true)
+       /* .sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistryImpl())
+        .expiredSessionStrategy(sessionInformationExpiredEvent -> {
+            HttpServletResponse response = sessionInformationExpiredEvent.getResponse();
+            response.setContentType("application/json;charset=UTF-8");
+            PrintWriter writer = response.getWriter();
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put("code", -1);
+            objectNode.put("msg", "2账号在另一台设备登录，本次登录下线2");
+            writer.println(objectNode.toString());
+            writer.close();
+        })*/
         ;
 
     }
 
     /**
-     * 自定义过滤器：1. 需要设置登录成功、失败的情况。configure(HttpSecurity http) 方法中 formLogin 相关设置的 loginProcessingUrl、登录成功、失败的设置会无效。
+     * 自定义过滤器：1. 需要设置登录成功、失败的情况。configure(HttpSecurity http) 方法中 formLogin 相关设置的 loginProcessingUrl、登录成功、失败的设置会无效，包括session的多端登录控制也会失效。
      *                      2.如果登录接口有变化必须设置setFilterProcessesUrl("/doLogin") 登录接口，【默认是 /login】，否则此过滤器无效，仍然会走原始的UsernamePasswordAuthenticationFilter。
      * @return
      * @throws Exception
@@ -253,20 +290,35 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             PrintWriter writer = response.getWriter();
             ObjectNode objectNode = objectMapper.createObjectNode();
             objectNode.put("code", -1);
-            objectNode.put("msg", "用户名或密码错误");
+            objectNode.put("msg", authenticationException.getMessage());
             writer.println(objectNode.toString());
             writer.close();
         });
         customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
+        //禁止同一账号的多端登录
+        ConcurrentSessionControlAuthenticationStrategy authenticationStrategy = new ConcurrentSessionControlAuthenticationStrategy(sessionRegistryImpl());
+        authenticationStrategy.setMaximumSessions(1);
+        CompositeSessionAuthenticationStrategy compositeSessionAuthenticationStrategy = new CompositeSessionAuthenticationStrategy(Lists.newArrayList(authenticationStrategy, new SessionFixationProtectionStrategy(),
+                new RegisterSessionAuthenticationStrategy(sessionRegistryImpl())));
+        customAuthenticationFilter.setSessionAuthenticationStrategy(compositeSessionAuthenticationStrategy);
         return customAuthenticationFilter;
+    }
+
+    /**
+     * 用来维护用户会话信息
+     * @return
+     */
+    @Bean(name = "sessionRegistry")
+    public SessionRegistryImpl sessionRegistryImpl() {
+        return new SessionRegistryImpl();
     }
 
     /**
      * jdbc 记录 remember me 的令牌信息
      * @return
      */
-    @Bean(name="persistentTokenRepository")
-    public PersistentTokenRepository persistentTokenRepository(){
+    @Bean(name = "persistentTokenRepository")
+    public PersistentTokenRepository persistentTokenRepository() {
         JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
         jdbcTokenRepository.setDataSource(dataSource);
         return jdbcTokenRepository;
@@ -280,8 +332,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      *     这一个失效事件无法被 Spring 容器感知到，进而导致当用户注销登录之后，Spring Security 没有及时清理会话信息表，以为用户还在线，进而导致用户无法重新登录进来。
      * @return
      */
-   @Bean(name="httpSessionEventPublisher")
-   public HttpSessionEventPublisher httpSessionEventPublisher(){
-       return new HttpSessionEventPublisher();
-   }
+    @Bean(name = "httpSessionEventPublisher")
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
 }

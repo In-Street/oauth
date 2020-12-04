@@ -56,7 +56,8 @@ Content-Type: application/json;charset=UTF-8
 
 {
   "uname": "admin",
-  "pwd": "admin"
+  "pwd": "admin",
+  "code": "7007"
 }
 
 ###
@@ -68,6 +69,8 @@ Cache-Control: no-cache
 GET {{url}}/remoteApi/admin
 Accept: *
 Cache-Control: no-cache
+
+
 
 ###
 GET {{url}}/no/free

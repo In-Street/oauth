@@ -35,11 +35,35 @@ isAuthenticated 当前用户是否认证成功。
     
 3. 一次完成的认证流程包含多个AuthenticationProvider，他们由ProviderManager进行管理。 ProviderManager # authenticate 方法逐个遍历 AuthenticationProvider # authenticate 方法认证。
 
-4. 自定义过滤器【验证码检验】会破坏原有的spring security 过滤链，可通过认证流程分析，采用自定义AuthenticationProvider 来代替DaoAuthenticationProvider，重写 additionalAuthenticationChecks 方法添加验证码检验功能即可。
+4. 自定义过滤器【验证码检验】会破坏原有的spring security 过滤链，可通过认证流程分析，采用自定义AuthenticationProvider 来代替DaoAuthenticationProvider，
+   重写 additionalAuthenticationChecks 方法添加验证码检验功能即可。或者在代替UsernamePasswordAuthenticationFilter的自定义CustomAuthenticationFilter类中校验。
+
+###json格式登录形式中，添加账号多端登录的控制
+####SessionRegistryImpl 类用于会话信息统一管理：
+```
+1. 在registerNewSession 方法中添加新session，存于ConcurrentMap中，key是 登录用户principal，value是该用户的sessionId集合。
+   principal用于key，因为在基于数据库管理用户时，User类有重写基于username的equals方法、hashCode方法。
+2.用户注销登录，sessionid 需要移除，相关操作在 removeSessionInformation 方法中完成 。
+```
+#### 自提供 SessionAuthenticationStrategy
+```
+1. 由于代替了UsernamePasswordAuthenticationFilter，所以在WebSecurityConfig的configure()关于session的配置会失效。需要在自定义过滤器中重新配置。
+2. 重新 new SessionRegistryImple()，来管理会话信息。
+3.  new  ConcurrentSessionControlAuthenticationStrategy(SessionRegistryImple) 来提供SessionAuthenticationStrategy, setMaximumSessions(1), 放于CustomAuthenticationFilter类。
+4. ConcurrentSessionControlAuthenticationStrategy -> onAuthentication 方法校验 该用户已注册的session集合和setMaximumSessions的允许最大session值比较处理
+```
+#### WebSecurityConfig 中替换ConcurrentSessionFilter
+```
+1. 由于重新new 了SessionRegistryImpl，ConcurrentSessionFilter类中也用到了，所以需要自定义。
+ http.addFilterAt(new ConcurrentSessionFilter(sessionRegistryImpl(), strategy -> {},ConcurrentSessionFilter.class)
+```
+#### 用户session的注册
+```
+CustomAuthenticationFilter 接受用户登录信息后，要注册进 SessionRegistry
+```
 
 
 ###TODO
-1.logout退出后仍能访问接口、
 2.角色继承无效、
 3.指定接口使用fullyAuthenticated 无效,仍能通过remember me 用户进行访问。
 4. 在client模块中自定义WebSecurity的Order导致的过滤链顺序问题,与@EnableOAuth2Sso
