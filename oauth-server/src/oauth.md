@@ -49,7 +49,8 @@ isAuthenticated 当前用户是否认证成功。
 ```
 1. 由于代替了UsernamePasswordAuthenticationFilter，所以在WebSecurityConfig的configure()关于session的配置会失效。需要在自定义过滤器中重新配置。
 2. 重新 new SessionRegistryImple()，来管理会话信息。
-3.  new  ConcurrentSessionControlAuthenticationStrategy(SessionRegistryImple) 来提供SessionAuthenticationStrategy, setMaximumSessions(1), 放于CustomAuthenticationFilter类。
+3.  new  ConcurrentSessionControlAuthenticationStrategy(SessionRegistryImple) 来提供SessionAuthenticationStrategy, setMaximumSessions(1), 
+    构造CompositeSessionAuthenticationStrategy，放于CustomAuthenticationFilter类。
 4. ConcurrentSessionControlAuthenticationStrategy -> onAuthentication 方法校验 该用户已注册的session集合和setMaximumSessions的允许最大session值比较处理
 ```
 #### WebSecurityConfig 中替换ConcurrentSessionFilter
