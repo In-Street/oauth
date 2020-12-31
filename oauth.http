@@ -57,7 +57,7 @@ Content-Type: application/json;charset=UTF-8
 {
   "uname": "admin",
   "pwd": "admin",
-  "code": "7007"
+  "code": "3541"
 }
 
 ###
@@ -70,10 +70,17 @@ GET {{url}}/remoteApi/admin
 Accept: *
 Cache-Control: no-cache
 
-
-
 ###
 GET {{url}}/no/free
 Accept: */*
 Cache-Control: no-cache
 
+### server 设置分布式session
+GET localhost:9090/demo/setSession
+Accept: */*
+Cache-Control: no-cache
+
+### server 获取分布式session值
+GET localhost:9090/demo/getSession?key=name
+Accept: */*
+Cache-Control: no-cache

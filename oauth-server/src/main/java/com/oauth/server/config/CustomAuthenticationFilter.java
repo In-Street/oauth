@@ -66,14 +66,14 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
             //将用户会话注册进session管理器中，用于多端登录的控制
             sessionRegistry.registerNewSession(request.getSession().getId(), new User(uname, pwd, authRequest.getAuthorities()));
-            List<Object> allPrincipals = sessionRegistry.getAllPrincipals();
+          /*  List<Object> allPrincipals = sessionRegistry.getAllPrincipals();
             allPrincipals.stream().forEach(p -> {
                 List<SessionInformation> allSessions = sessionRegistry.getAllSessions(p, false);
                 allSessions.stream().forEach(s -> {
                     System.out.println(s.getPrincipal() + ">>" + s.getSessionId() + ">>" + s.isExpired()
                     +">>"+dateFormat.format(s.getLastRequest()));
                 });
-            });
+            });*/
             //验证
             return getAuthenticationManager().authenticate(authRequest);
         }

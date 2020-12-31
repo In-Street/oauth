@@ -38,10 +38,7 @@ import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFacto
 import sun.security.util.Pem;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.Security;
@@ -129,9 +126,16 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 	@Bean
 	public JwtAccessTokenConverter jwtAccessTokenConverter() throws IOException {
 
-		File priKeyFile = new PathMatchingResourcePatternResolver().getResource("classpath:prikey.pem").getFile();
 		Security.addProvider(new BouncyCastleProvider());
-		PEMParser parserPri = new PEMParser(new FileReader(priKeyFile));
+
+		//本地启动可以文件形式读取
+		/*File priKeyFile = new PathMatchingResourcePatternResolver().getResource("classpath:prikey.pem").getFile();
+		PEMParser parserPri = new PEMParser(new FileReader(priKeyFile));*/
+
+		// jar包部署时需以流的形式读取，否则 报【cannot be resolved to absolute file path】
+		InputStream inputStream = new PathMatchingResourcePatternResolver().getResource("classpath:prikey.pem").getInputStream();
+		PEMParser parserPri = new PEMParser(new InputStreamReader(inputStream));
+
 		JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
 		Object o = parserPri.readObject();
 		KeyPair keyPair = converter.getKeyPair(((PEMKeyPair) o));

@@ -3,6 +3,7 @@ package com.oauth.server.controller;
 import com.google.code.kaptcha.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,12 +27,20 @@ public class DemoController {
 
     @Autowired
     private Producer producer;
+    @Value("${server.port}")
+    private Integer port;
 
     @GetMapping("/index")
     public ModelAndView index() {
         return new ModelAndView("index");
     }
 
+    /**
+     * 验证码
+     * @param response
+     * @param session
+     * @throws IOException
+     */
     @GetMapping("/produceCode")
     public void produceCode(HttpServletResponse response, HttpSession session) throws IOException {
         response.setContentType("image/jpeg");
@@ -42,5 +51,16 @@ public class DemoController {
         ServletOutputStream outputStream = response.getOutputStream();
         ImageIO.write(image, "jpg", outputStream);
         outputStream.close();
+    }
+
+    @GetMapping("/setSession")
+    public String session(HttpSession session) {
+        session.setAttribute("name", "Taylor·Swift");
+        return String.valueOf(port);
+    }
+
+    @GetMapping("/getSession")
+    public String getSession(HttpSession session, String key) {
+        return session.getAttribute(key) + ">>>" + port;
     }
 }

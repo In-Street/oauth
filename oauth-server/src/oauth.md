@@ -63,6 +63,19 @@ isAuthenticated 当前用户是否认证成功。
 CustomAuthenticationFilter 接受用户登录信息后，要注册进 SessionRegistry
 ```
 
+### 防止会话固定攻击
+```
+WebSecurityConfig configure 方法中设置：http.sessionManagement().sessionFixation().xxxx
+
+1. migrateSession: 默认，登录成功后生成新session，将旧session信息复制到新session中。
+
+2. none：不做任何事情，继续使用旧的 session。
+
+3. changeSessionId: 表示 session 不变，但是会修改 sessionid，这实际上用到了 Servlet 容器提供的防御会话固定攻击。
+
+4. newSession:  表示登录后创建一个新的 session。
+  
+```
 
 ###TODO
 2.角色继承无效、

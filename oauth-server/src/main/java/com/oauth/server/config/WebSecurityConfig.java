@@ -7,6 +7,8 @@ import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -34,6 +36,9 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionInformationExpiredEvent;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -58,6 +63,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private DataSource dataSource;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private FindByIndexNameSessionRepository sessionRepository;
+
 
     @Bean(name = "authenticationManager")
     @Override
@@ -174,7 +182,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         //因为使用customAuthenticationFilter取代UsernamePasswordAuthenticationFilter，
         // 且ConcurrentSessionFilter 用到了SessionRegistryImpl，所以需要重新设置ConcurrentSessionFilter，使用自定义的SessionRegistry及信息返回
-        http.addFilterAt(new ConcurrentSessionFilter(sessionRegistryImpl(), strategy -> {
+        http.addFilterAt(new ConcurrentSessionFilter(springSessionBackedSessionRegistry(), strategy -> {
             HttpServletResponse response = strategy.getResponse();
             response.setContentType("application/json;charset=UTF-8");
             PrintWriter writer = response.getWriter();
@@ -189,7 +197,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeRequests()
-                .antMatchers("/demo/produceCode").permitAll()
+                .antMatchers("/demo/produceCode", "/demo/setSession", "/demo/getSession").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -253,6 +261,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .permitAll()
                 .and().csrf().disable()
+                //防止会话固定攻击：默认方式migrateSession:登录成功后生成新session，将旧session信息复制到新session中。
+                .sessionManagement().sessionFixation().migrateSession()
        /* .sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistryImpl())
         .expiredSessionStrategy(sessionInformationExpiredEvent -> {
             HttpServletResponse response = sessionInformationExpiredEvent.getResponse();
@@ -296,21 +306,35 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         });
         customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
         //禁止同一账号的多端登录
-        ConcurrentSessionControlAuthenticationStrategy authenticationStrategy = new ConcurrentSessionControlAuthenticationStrategy(sessionRegistryImpl());
+       /* ConcurrentSessionControlAuthenticationStrategy authenticationStrategy = new ConcurrentSessionControlAuthenticationStrategy(sessionRegistryImpl());
         authenticationStrategy.setMaximumSessions(1);
         CompositeSessionAuthenticationStrategy compositeSessionAuthenticationStrategy = new CompositeSessionAuthenticationStrategy(Lists.newArrayList(authenticationStrategy, new SessionFixationProtectionStrategy(),
-                new RegisterSessionAuthenticationStrategy(sessionRegistryImpl())));
+                new RegisterSessionAuthenticationStrategy(sessionRegistryImpl())));*/
+
+        ConcurrentSessionControlAuthenticationStrategy authenticationStrategy = new ConcurrentSessionControlAuthenticationStrategy(springSessionBackedSessionRegistry());
+        authenticationStrategy.setMaximumSessions(1);
+        CompositeSessionAuthenticationStrategy compositeSessionAuthenticationStrategy = new CompositeSessionAuthenticationStrategy(Lists.newArrayList(authenticationStrategy, new SessionFixationProtectionStrategy(),
+                new RegisterSessionAuthenticationStrategy(springSessionBackedSessionRegistry())));
         customAuthenticationFilter.setSessionAuthenticationStrategy(compositeSessionAuthenticationStrategy);
         return customAuthenticationFilter;
     }
 
     /**
-     * 用来维护用户会话信息
+     * 使用内存维护用户会话信息
+     * @return
+     */
+   /* @Bean(name = "sessionRegistry")
+    public SessionRegistryImpl sessionRegistryImpl() {
+        return new SessionRegistryImpl();
+    }*/
+
+    /**
+     * 使用redis维护用户会话信息
      * @return
      */
     @Bean(name = "sessionRegistry")
-    public SessionRegistryImpl sessionRegistryImpl() {
-        return new SessionRegistryImpl();
+    public SpringSessionBackedSessionRegistry springSessionBackedSessionRegistry() {
+        return new SpringSessionBackedSessionRegistry(sessionRepository);
     }
 
     /**
@@ -330,10 +354,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      *
      *  2. 在spring security 中，通过监听session销毁事件，来及时清理session记录。默认的失效是通过调用 StandardSession#invalidate 方法来实现的，
      *     这一个失效事件无法被 Spring 容器感知到，进而导致当用户注销登录之后，Spring Security 没有及时清理会话信息表，以为用户还在线，进而导致用户无法重新登录进来。
+     *
+     *  3. 当使用redis来控制session时，无需设置此bean。否则报【FindByIndexNameSessionRepository “RedisConnectionFactory is required”】
      * @return
      */
-    @Bean(name = "httpSessionEventPublisher")
+   /* @Bean(name = "httpSessionEventPublisher")
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
-    }
+    }*/
 }

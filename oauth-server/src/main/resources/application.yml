@@ -4,10 +4,13 @@ spring:
   application.name: oauth-server
   profiles.active: dev
   datasource:
-    url: jdbc:mysql://39.106.118.71/oauth?characterEncoding=utf-8
-    username: ENC(3RS678xyF+OMSsvPhk/Jog==)
-    password: ENC(ZSbSDPMfbQpDqKwJvcoTR/vaEBBEF1ew)
+    url: jdbc:mysql://127.0.0.1/oauth?characterEncoding=utf-8
+    username: ENC(nd9rjl7tACu8T80iTddGKw==)
+    password: ENC(b8eDeK2pq9FUmS4p5K7aqg==)
     driver-class-name: com.mysql.jdbc.Driver
+  redis:
+    host: 127.0.0.1
+    port: 6379
 
 ---
 spring.profiles: dev
@@ -15,3 +18,4 @@ spring.profiles: dev
 # 指定log4j2作为日志记录
 logging:
   config: classpath:log4j2-9090.xml
+#  config: classpath:log4j2-9190.xml
