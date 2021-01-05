@@ -1,5 +1,7 @@
 server:
   port: 9090
+  servlet:
+    context-path: /server
 spring:
   application.name: oauth-server
   profiles.active: dev

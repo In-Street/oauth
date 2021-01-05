@@ -88,7 +88,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 自定义表单登录,忽略一些静态文件
+     * 1.自定义表单登录,常用于静态资源放行，此方式不会走spring  security的过滤链。
+     *
+     * 2. configure(HttpSecurity http) 中常用于接口的放行，此方式 是在spring  security的过滤链中进行放行。
+     * eg：将登录接口使用静态资源放行方式的话，不走过滤链，那么用户信息也不会存在SecurityContextHolder，后续也将无法获取用户信息。
+     * 【
+     *       获取用户信息的两种方式：a.SecurityContextHolder.getContext().getAuthentication()。
+     *                                           b. Controller 方法中添加 Authentication 参数。
+     * 】
+     *
      * @param web
      * @throws Exception
      */
@@ -292,7 +300,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             Object principal = authentication.getPrincipal();
             response.setContentType("application/json; charset=UTF-8");
             PrintWriter writer = response.getWriter();
-            writer.write(objectMapper.writeValueAsString(principal));
+            writer.write("认证成功："+objectMapper.writeValueAsString(principal));
             writer.close();
         });
         customAuthenticationFilter.setAuthenticationFailureHandler((request, response, authenticationException) -> {

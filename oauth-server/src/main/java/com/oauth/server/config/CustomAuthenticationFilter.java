@@ -40,7 +40,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        if ("POST".equals(request.getMethod()) && request.getRequestURI().equals("/doLogin")
+        if ("POST".equals(request.getMethod()) && request.getRequestURI().equals("/server/doLogin")
                 && (MediaType.APPLICATION_JSON_VALUE.equals(request.getContentType()) || MediaType.APPLICATION_JSON_UTF8_VALUE.equals(request.getContentType()))) {
             //从请求json中获取用户名、密码
             ObjectMapper objectMapper = new ObjectMapper();

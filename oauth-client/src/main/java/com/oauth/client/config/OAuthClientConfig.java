@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
  * @create 2020-11-06 17:16
  **/
 @Configuration
+//开启单点登录
 @EnableOAuth2Sso
 //@EnableOAuth2Client
 public class OAuthClientConfig  {
