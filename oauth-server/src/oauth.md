@@ -80,4 +80,5 @@ WebSecurityConfig configure 方法中设置：http.sessionManagement().sessionFi
 ###TODO
 2.角色继承无效、
 3.指定接口使用fullyAuthenticated 无效,仍能通过remember me 用户进行访问。
-4. 在client模块中自定义WebSecurity的Order导致的过滤链顺序问题,与@EnableOAuth2Sso
+4. 在client模块中自定义WebSecurity的Order导致的过滤链顺序问题,与@EnableOAuth2Sso。
+5. nginx中配置多个client服务，无法正常访问client接口。

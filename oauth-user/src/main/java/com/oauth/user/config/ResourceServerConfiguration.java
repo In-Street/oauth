@@ -16,9 +16,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -64,8 +62,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Bean(name = "tokenStore")
     public TokenStore tokenStore() throws IOException {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        File pubKeyFile = new PathMatchingResourcePatternResolver().getResource("classpath:pubkey.pem").getFile();
-        PEMParser pemParser = new PEMParser(new FileReader(pubKeyFile));
+        /*File pubKeyFile = new PathMatchingResourcePatternResolver().getResource("classpath:pubkey.pem").getFile();
+        PEMParser pemParser = new PEMParser(new FileReader(pubKeyFile));*/
+        InputStream inputStream = new PathMatchingResourcePatternResolver().getResource("classpath:pubkey.pem").getInputStream();
+        PEMParser pemParser = new PEMParser(new InputStreamReader(inputStream));
         PublicKey publicKey = new JcaPEMKeyConverter().getPublicKey(((SubjectPublicKeyInfo) pemParser.readObject()));
 
         jwtAccessTokenConverter.setVerifier(new RsaVerifier(((RSAPublicKey) publicKey)));
