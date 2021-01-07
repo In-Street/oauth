@@ -76,9 +76,17 @@ WebSecurityConfig configure 方法中设置：http.sessionManagement().sessionFi
 4. newSession:  表示登录后创建一个新的 session。
   
 ```
+###注意⚠️
+1. nginx 配置多个client时，upstream中需使用 ip_hash,否则登录之后无法访问client的接口；
+   【访问client接口/client/A；
+       从授权服务器接口 /oauth/authorize 获取授权码，返回的 redirect_uri后拼接code=授权码；
+       从授权服务器接口 /oauth/token 拿授权码获取 token；
+       拿token访问 /client/A 成功；
+     】
+
 
 ###TODO
 2.角色继承无效、
 3.指定接口使用fullyAuthenticated 无效,仍能通过remember me 用户进行访问。
 4. 在client模块中自定义WebSecurity的Order导致的过滤链顺序问题,与@EnableOAuth2Sso。
-5. nginx中配置多个client服务，无法正常访问client接口。
+5. 使用jwt，refresh_token 时候 提示需要UserDetailService

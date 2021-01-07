@@ -16,6 +16,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -29,6 +30,8 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
@@ -42,6 +45,7 @@ import java.io.*;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.Security;
+import java.util.Arrays;
 
 /**
  *
@@ -66,6 +70,14 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 	 */
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+		/*在内存中配置客户端，方便测试
+		clients.inMemory()
+				.withClient("CYF")
+				.secret(passwordEncoder.encode("123"))
+				.resourceIds("res1")
+				.authorizedGrantTypes("password", "refresh_token")
+				.scopes("all")
+				.redirectUris("http://localhost:xxx");*/
 		clients.jdbc(dataSource);
 	}
 
@@ -87,11 +99,12 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 
 
 	/**
-	 * 配置Token存放方式，不是内存、数据库等，以JWT存储；
+	 * 配置令牌的访问端点和令牌服务。
+	 *   1。配置Token存放方式，不是内存、数据库等，以JWT存储；
 	 *
-	 * 配置用户授权批准记录存储方式；
+	 *   2。配置用户授权批准记录存储方式；
 	 *
-	 * 自定义Token增强器，将更多信息存入Token中；
+	 *   3。自定义Token增强器，将更多信息存入Token中；
 	 *
 	 * @param endpoints
 	 * @throws Exception
@@ -120,7 +133,7 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 	}
 
 	/**
-	 *配置JWT，使用非堆成加密方式验证
+	 *配置JWT，使用非对称加密方式验证，实现将登录用户信息和 JWT 进行转换
 	 * @return
 	 */
 	@Bean
@@ -142,6 +155,8 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 
 		JwtAccessTokenConverter tokenConverter = new JwtAccessTokenConverter();
 		tokenConverter.setKeyPair(keyPair);
+		//签名字符串
+		//tokenConverter.setSigningKey();
 
 		return tokenConverter;
 	}
@@ -170,4 +185,19 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 			}
 		};
 	}
+
+  //配置Token的存储、刷新、有效期等
+	/*@Bean
+	AuthorizationServerTokenServices tokenServices() {
+		DefaultTokenServices services = new DefaultTokenServices();
+		services.setClientDetailsService(clientDetailsService);
+		services.setSupportRefreshToken(true);
+		services.setTokenStore(tokenStore);
+		services.setAccessTokenValiditySeconds(60 * 60 * 24 * 2);
+		services.setRefreshTokenValiditySeconds(60 * 60 * 24 * 7);
+		TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(jwtAccessTokenConverter));
+		services.setTokenEnhancer(tokenEnhancerChain);
+		return services;
+	}*/
 }

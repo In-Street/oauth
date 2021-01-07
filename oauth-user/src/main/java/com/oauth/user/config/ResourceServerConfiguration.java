@@ -59,6 +59,11 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .anyRequest().permitAll();
     }
 
+    /**
+     * 配置公钥，用于解析jwt token获取用户信息
+     * @return
+     * @throws IOException
+     */
     @Bean(name = "tokenStore")
     public TokenStore tokenStore() throws IOException {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();

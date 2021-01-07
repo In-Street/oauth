@@ -38,6 +38,7 @@ import org.springframework.security.web.session.SessionInformationExpiredStrateg
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
+import org.springframework.session.events.SessionDestroyedEvent;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 import javax.servlet.ServletException;
@@ -51,7 +52,7 @@ import java.io.PrintWriter;
 
 
 /**
- *
+ * 配置用户登录相关
  * @author Cheng Yufei
  * @create 2020-10-29 16:15
  **/
@@ -82,6 +83,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+        /* 内存配置登录用户，方便测试
+        auth.inMemoryAuthentication()
+                .withUser("sang")
+                .password(passwordEncoder().encode("123"))
+                .roles("admin")
+                .and()
+                .withUser("javaboy")
+                .password(passwordEncoder().encode("123"))
+                .roles("user");*/
         auth.jdbcAuthentication()
                 .dataSource(dataSource)
                 .passwordEncoder(new BCryptPasswordEncoder());
@@ -268,6 +279,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .clearAuthentication(true)
                 .invalidateHttpSession(true)
                 .permitAll()
+                .and().cors()
                 .and().csrf().disable()
                 //防止会话固定攻击：默认方式migrateSession:登录成功后生成新session，将旧session信息复制到新session中。
                 .sessionManagement().sessionFixation().migrateSession()
