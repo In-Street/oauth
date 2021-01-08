@@ -55,9 +55,9 @@ Cache-Control: no-cache
 Content-Type: application/json;charset=UTF-8
 
 {
-  "uname": "admin",
-  "pwd": "admin",
-  "code": "8500"
+  "uname": "writer",
+  "pwd": "writer",
+  "code": "5949"
 }
 
 ###
@@ -66,9 +66,31 @@ Accept: */*
 Cache-Control: no-cache
 
 ### client 访问资源服务器接口
-GET {{url}}/remoteApi/admin
+GET {{url}}/remoteApi/write
 Accept: *
 Cache-Control: no-cache
+
+###client 登录用户必须是固定用户才能成功访问资源服务器接口
+GET {{url}}/remoteApi/writerName
+Accept: */*
+Cache-Control: no-cache
+
+###client age需大于某值才能成功访问资源服务器接口
+GET {{url}}/remoteApi/writeAge?age=30
+Accept: */*
+Cache-Control: no-cache
+
+### client 前置过滤参数后在访问资源服务器接口
+GET {{url}}/remoteApi/writePreFilter
+Accept: */*
+Cache-Control: no-cache
+
+###client 访问资源服务器接口后只返回某些符合条件的元素
+GET {{url}}/remoteApi/writePostFilter
+Accept: */*
+Cache-Control: no-cache
+
+
 
 ###
 GET {{url}}/no/free

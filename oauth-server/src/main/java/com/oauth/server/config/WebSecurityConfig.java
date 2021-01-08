@@ -320,7 +320,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             PrintWriter writer = response.getWriter();
             ObjectNode objectNode = objectMapper.createObjectNode();
             objectNode.put("code", -1);
-            objectNode.put("msg", authenticationException.getMessage());
+            objectNode.put("msg", "用户名或密码错误："+authenticationException.getMessage());
             writer.println(objectNode.toString());
             writer.close();
         });
