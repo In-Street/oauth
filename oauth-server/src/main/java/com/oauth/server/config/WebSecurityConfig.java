@@ -86,7 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * user 多数据源配置
+     * user 多数据源配置: 提供多个DaoAuthenticationProvider，每个对应一个数据源，统一由ProviderManager管理即可
      * @return
      * @throws Exception
      */

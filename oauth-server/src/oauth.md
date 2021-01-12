@@ -37,6 +37,8 @@ isAuthenticated 当前用户是否认证成功。
 
 4. 自定义过滤器【验证码检验】会破坏原有的spring security 过滤链，可通过认证流程分析，采用自定义AuthenticationProvider 来代替DaoAuthenticationProvider，
    重写 additionalAuthenticationChecks 方法添加验证码检验功能即可。或者在代替UsernamePasswordAuthenticationFilter的自定义CustomAuthenticationFilter类中校验。
+   
+5. user的多数据源，可提供多个DaoAuthenticationProvider，每个对应一个数据源，统一交由ProviderManager管理即可。
 
 ###json格式登录形式中，添加账号多端登录的控制
 ####SessionRegistryImpl 类用于会话信息统一管理：
