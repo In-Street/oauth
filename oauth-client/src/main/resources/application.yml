@@ -14,10 +14,11 @@ security:
     client:
       client-id: userservice3
       client-secret: 1234
-      #令牌获取
-      access-token-uri: http://oauth.local/server/oauth/token
-      #授权
+      #授权,获取授权码
       user-authorization-uri: http://oauth.local/server/oauth/authorize
+      #根据授权码获取令牌
+      access-token-uri: http://oauth.local/server/oauth/token
+
       scope: FOO
 
     resource:

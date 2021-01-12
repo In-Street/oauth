@@ -55,9 +55,9 @@ Cache-Control: no-cache
 Content-Type: application/json;charset=UTF-8
 
 {
-  "uname": "writer",
-  "pwd": "writer",
-  "code": "5949"
+  "uname": "admin",
+  "pwd": "admin",
+  "code": "0511"
 }
 
 ###
@@ -66,8 +66,8 @@ Accept: */*
 Cache-Control: no-cache
 
 ### client 访问资源服务器接口
-GET {{url}}/remoteApi/write
-Accept: *
+GET {{url}}/remoteApi/admin
+Accept: */*
 Cache-Control: no-cache
 
 ###client 登录用户必须是固定用户才能成功访问资源服务器接口
@@ -104,5 +104,10 @@ Cache-Control: no-cache
 
 ### server 获取分布式session值
 GET {{url}}/demo/getSession?key=name
+Accept: */*
+Cache-Control: no-cache
+
+###server 定义权限，自定义授权异常
+GET {{url}}/demo/accessDenied
 Accept: */*
 Cache-Control: no-cache

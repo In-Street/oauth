@@ -66,6 +66,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private ObjectMapper objectMapper;
     @Autowired
     private FindByIndexNameSessionRepository sessionRepository;
+    @Autowired
+    private MyAccessException myAccessException;
 
 
     @Bean(name = "authenticationManager")
@@ -216,9 +218,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeRequests()
+                //不登录时允许访问的接口
                 .antMatchers("/demo/produceCode", "/demo/setSession", "/demo/getSession").permitAll()
+                .antMatchers("/demo/accessDenied").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()
+                //配置表单登录细节
                 .formLogin()
                 //.loginPage("/login.html")
                 //.loginProcessingUrl("/doLogin")
@@ -250,6 +255,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //设置未认证情况, 提示未登录信息，否则默认是重定向到登录页
                 .and()
                 .exceptionHandling()
+                //自定义认证异常
                 .authenticationEntryPoint((request, response, authenticationException) -> {
                     response.setContentType("application/json;charset=UTF-8");
                     PrintWriter writer = response.getWriter();
@@ -260,6 +266,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     writer.println(objectNode.toString());
                     writer.close();
                 })
+                //自定义授权异常:
+                //1. 无法处理client端访问资源服务器的接口时的无权访问的情况。此时client端报OAuth2AccessDeniedException，需在client端定义异常拦截返回自定义格式。
+                //2。此设置针对server端接口，且是在configure(HttpSecurity http)中定义接口的hasAuthority("")时有效。使用@PreAuthorize时自定义授权异常无效。
+                .accessDeniedHandler(myAccessException)
 
                 //退出登录成功，提示信息，否则默认是重定向到登录页
                 .and().logout()
@@ -279,6 +289,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .clearAuthentication(true)
                 .invalidateHttpSession(true)
                 .permitAll()
+                //解决跨域
                 .and().cors()
                 .and().csrf().disable()
                 //防止会话固定攻击：默认方式migrateSession:登录成功后生成新session，将旧session信息复制到新session中。

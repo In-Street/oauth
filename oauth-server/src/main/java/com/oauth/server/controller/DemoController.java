@@ -4,6 +4,7 @@ import com.google.code.kaptcha.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,5 +63,10 @@ public class DemoController {
     @GetMapping("/getSession")
     public String getSession(HttpSession session, String key) {
         return session.getAttribute(key) + ">>>" + port;
+    }
+
+    @GetMapping("/accessDenied")
+    public String accessDenied() {
+        return "测试无权访问的自定义异常";
     }
 }
