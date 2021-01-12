@@ -49,7 +49,7 @@ public class TestD {
     public void password() throws NoSuchAlgorithmException {
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        System.out.println(passwordEncoder.encode("writer"));
+        System.out.println(passwordEncoder.encode("swift"));
 
         System.out.println(passwordEncoder.matches("writer", "$2a$10$Du3s4X6ufXGrHBPsUAH5Ie0S8UHroZDtcNB/oUfEdR5PSbKzK7hSi"));
 

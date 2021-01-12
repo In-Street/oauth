@@ -14,6 +14,8 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -21,8 +23,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -69,22 +73,52 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private MyAccessException myAccessException;
 
+    @Bean(name = "userDetailsService")
+    @Override
+    public UserDetailsService userDetailsService() {
+        return new JdbcUserDetailsManager(dataSource);
+    }
 
+    @Bean(name = "userDetailsService2")
+    public UserDetailsService userDetailsService2() {
+        return new InMemoryUserDetailsManager(User.builder().username("Taylor")
+                .password("$2a$10$K.9W0tEm3/k6zQYGWeQEiOlS5O05lw02VVmeCPoC4.KiU/VKT4M3C").roles("USER").build());
+    }
+
+    /**
+     * user 多数据源配置
+     * @return
+     * @throws Exception
+     */
     @Bean(name = "authenticationManager")
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+        //数据源1
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService());
+        daoAuthenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+
+        ////数据源2
+        DaoAuthenticationProvider daoAuthenticationProvider2 = new DaoAuthenticationProvider();
+        daoAuthenticationProvider2.setUserDetailsService(userDetailsService2());
+        daoAuthenticationProvider2.setPasswordEncoder(new BCryptPasswordEncoder());
+
+        ProviderManager providerManager = new ProviderManager(Lists.newArrayList(daoAuthenticationProvider, daoAuthenticationProvider2));
+        return providerManager;
+        //return super.authenticationManagerBean();
     }
 
     /**
      * 配置用户认证方式 - 数据库方式；
-     * BCryptPasswordEncoder方式保存用户密码
+     * BCryptPasswordEncoder方式保存用户密码，authenticationManagerBean使用super。
+     *
+     * 或 创建 Bean authenticationManagerBean时指定数据源。
      * @param auth
      * @throws Exception
      *
      */
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    //@Override
+    protected void configure2(AuthenticationManagerBuilder auth) throws Exception {
 
         /* 内存配置登录用户，方便测试
         auth.inMemoryAuthentication()
@@ -217,6 +251,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //自定义登录的过滤器实现json传输用户名、密码。代替UsernamePasswordAuthenticationFilter
         http.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
+        //authorizeRequests放在首位表示此过滤链的过滤路径是/**
+        //http.antMatchers("/foo/**").authorizeRequests():表示此过滤链的过滤路径是/foo下的请求
         http.authorizeRequests()
                 //不登录时允许访问的接口
                 .antMatchers("/demo/produceCode", "/demo/setSession", "/demo/getSession").permitAll()
@@ -323,7 +359,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             Object principal = authentication.getPrincipal();
             response.setContentType("application/json; charset=UTF-8");
             PrintWriter writer = response.getWriter();
-            writer.write("认证成功："+objectMapper.writeValueAsString(principal));
+            writer.write("认证成功：" + objectMapper.writeValueAsString(principal));
             writer.close();
         });
         customAuthenticationFilter.setAuthenticationFailureHandler((request, response, authenticationException) -> {
@@ -331,7 +367,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             PrintWriter writer = response.getWriter();
             ObjectNode objectNode = objectMapper.createObjectNode();
             objectNode.put("code", -1);
-            objectNode.put("msg", "用户名或密码错误："+authenticationException.getMessage());
+            objectNode.put("msg", "用户名或密码错误：" + authenticationException.getMessage());
             writer.println(objectNode.toString());
             writer.close();
         });

@@ -16,6 +16,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -38,6 +41,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import sun.security.util.Pem;
 
 import javax.sql.DataSource;
@@ -62,6 +66,8 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 	private DataSource dataSource;
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	@Autowired
+	private UserDetailsService userDetailsService;
 
 	/**
 	 * 使用数据库维护客户端信息
@@ -120,6 +126,8 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
 				.authenticationManager(authenticationManager)
 				.authorizationCodeServices(authorizationCodeServices())
 				.tokenEnhancer(tokenEnhancerChain)
+				//指定userDetailsService，refresh_token时会使用，否则报 UserDetailService is required，但也能刷新成功
+				.userDetailsService(userDetailsService)
 				.exceptionTranslator(loggingExceptionTranslator());
 	}
 

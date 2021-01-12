@@ -57,7 +57,7 @@ Content-Type: application/json;charset=UTF-8
 {
   "uname": "admin",
   "pwd": "admin",
-  "code": "0511"
+  "code": "9626"
 }
 
 ###
@@ -66,7 +66,7 @@ Accept: */*
 Cache-Control: no-cache
 
 ### client 访问资源服务器接口
-GET {{url}}/remoteApi/admin
+GET {{url}}/remoteApi/write
 Accept: */*
 Cache-Control: no-cache
 
