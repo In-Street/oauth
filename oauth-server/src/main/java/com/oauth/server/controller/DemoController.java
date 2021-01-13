@@ -4,9 +4,13 @@ import com.google.code.kaptcha.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -16,6 +20,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Cheng Yufei
@@ -30,6 +38,10 @@ public class DemoController {
     private Producer producer;
     @Value("${server.port}")
     private Integer port;
+    @Autowired
+    private SessionRegistry sessionRegistry;
+    @Autowired
+    private RedisIndexedSessionRepository redisIndexedSessionRepository;
 
     @GetMapping("/index")
     public ModelAndView index() {
@@ -54,6 +66,11 @@ public class DemoController {
         outputStream.close();
     }
 
+    /**
+     * spring session, 分布式session测试
+     * @param session
+     * @return
+     */
     @GetMapping("/setSession")
     public String session(HttpSession session) {
         session.setAttribute("name", "Taylor·Swift");
@@ -68,5 +85,24 @@ public class DemoController {
     @GetMapping("/accessDenied")
     public String accessDenied() {
         return "测试无权访问的自定义异常";
+    }
+
+    /**
+     * 获取在线用户：适用于 SessionRegistryImpl   的实现方式。spring session 不支持
+     * @return
+     */
+    @GetMapping("/onlineNum")
+    public String onlineNum() {
+        List<Object> collect = sessionRegistry.getAllPrincipals().stream().filter(u -> !sessionRegistry.getAllSessions(u, false).isEmpty())
+                .collect(Collectors.toList());
+        return collect.size() + "";
+    }
+
+    @GetMapping("/onlineNum2")
+    public String onlineNum2(@RequestParam String pattern) {
+        RedisOperations<Object, Object> sessionRedisOperations = redisIndexedSessionRepository.getSessionRedisOperations();
+        Set<Object> keys = sessionRedisOperations.keys(pattern);
+        System.out.println(keys);
+        return keys.size() + "";
     }
 }

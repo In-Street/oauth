@@ -57,7 +57,7 @@ Content-Type: application/json;charset=UTF-8
 {
   "uname": "admin",
   "pwd": "admin",
-  "code": "9626"
+  "code": "1677"
 }
 
 ###
@@ -66,7 +66,7 @@ Accept: */*
 Cache-Control: no-cache
 
 ### client 访问资源服务器接口
-GET {{url}}/remoteApi/write
+GET {{url}}/remoteApi/admin
 Accept: */*
 Cache-Control: no-cache
 
@@ -109,5 +109,10 @@ Cache-Control: no-cache
 
 ###server 定义权限，自定义授权异常
 GET {{url}}/demo/accessDenied
+Accept: */*
+Cache-Control: no-cache
+
+###
+GET {{url}}/demo/onlineNum2?pattern=
 Accept: */*
 Cache-Control: no-cache

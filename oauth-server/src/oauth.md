@@ -86,6 +86,11 @@ WebSecurityConfig configure 方法中设置：http.sessionManagement().sessionFi
        拿token访问 /client/A 成功；
      】
 
+### 子线程获取登录用户信息
+```
+1. 默认情况下子线程获取不到用户信息，因为SecurityContextHolder将信息保存到ThreadLocal中。
+2. 修改 SecurityContextHolder 的默认数据存储策略：-Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL。这样信息存于 InheritableThreadLocal。
+```
 
 ###TODO
 2.角色继承无效、

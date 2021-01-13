@@ -64,8 +64,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(uname, pwd);
             setDetails(request, authRequest);
 
-            //将用户会话注册进session管理器中，用于多端登录的控制
-            sessionRegistry.registerNewSession(request.getSession().getId(), new User(uname, pwd, authRequest.getAuthorities()));
+            //使用sessionRegistryImple时，将用户会话注册进session管理器中，用于多端登录的控制。使用spring session时无需此操作
+            //sessionRegistry.registerNewSession(request.getSession().getId(), new User(uname, pwd, authRequest.getAuthorities()));
           /*  List<Object> allPrincipals = sessionRegistry.getAllPrincipals();
             allPrincipals.stream().forEach(p -> {
                 List<SessionInformation> allSessions = sessionRegistry.getAllSessions(p, false);

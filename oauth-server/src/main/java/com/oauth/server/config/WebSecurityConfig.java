@@ -3,16 +3,9 @@ package com.oauth.server.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,9 +13,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,19 +26,11 @@ import org.springframework.security.web.authentication.session.ConcurrentSession
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.security.web.session.SessionInformationExpiredEvent;
-import org.springframework.security.web.session.SessionInformationExpiredStrategy;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
-import org.springframework.session.events.SessionDestroyedEvent;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 //TODO BY Cheng Yufei <-2020-11-18 14:20->
@@ -69,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private FindByIndexNameSessionRepository sessionRepository;
+    private RedisIndexedSessionRepository sessionRepository;
     @Autowired
     private MyAccessException myAccessException;
 
@@ -237,6 +219,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         //因为使用customAuthenticationFilter取代UsernamePasswordAuthenticationFilter，
         // 且ConcurrentSessionFilter 用到了SessionRegistryImpl，所以需要重新设置ConcurrentSessionFilter，使用自定义的SessionRegistry及信息返回
+        //http.addFilterAt(new ConcurrentSessionFilter(sessionRegistryImpl(), strategy -> {
         http.addFilterAt(new ConcurrentSessionFilter(springSessionBackedSessionRegistry(), strategy -> {
             HttpServletResponse response = strategy.getResponse();
             response.setContentType("application/json;charset=UTF-8");
@@ -255,7 +238,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //http.antMatchers("/foo/**").authorizeRequests():表示此过滤链的过滤路径是/foo下的请求
         http.authorizeRequests()
                 //不登录时允许访问的接口
-                .antMatchers("/demo/produceCode", "/demo/setSession", "/demo/getSession").permitAll()
+                .antMatchers("/demo/produceCode", "/demo/setSession", "/demo/getSession","/demo/onlineNum").permitAll()
                 .antMatchers("/demo/accessDenied").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()
@@ -373,7 +356,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         });
         customAuthenticationFilter.setFilterProcessesUrl("/doLogin");
         //禁止同一账号的多端登录
-       /* ConcurrentSessionControlAuthenticationStrategy authenticationStrategy = new ConcurrentSessionControlAuthenticationStrategy(sessionRegistryImpl());
+        /*ConcurrentSessionControlAuthenticationStrategy authenticationStrategy = new ConcurrentSessionControlAuthenticationStrategy(sessionRegistryImpl());
         authenticationStrategy.setMaximumSessions(1);
         CompositeSessionAuthenticationStrategy compositeSessionAuthenticationStrategy = new CompositeSessionAuthenticationStrategy(Lists.newArrayList(authenticationStrategy, new SessionFixationProtectionStrategy(),
                 new RegisterSessionAuthenticationStrategy(sessionRegistryImpl())));*/
@@ -387,7 +370,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 使用内存维护用户会话信息
+     * spring security 提供实现。
+     * 使用内存维护用户会话信息。分布式情况下，登录的session存于各自的ConcurrentHashMap中，无法控制同一用户只登录一端。
      * @return
      */
    /* @Bean(name = "sessionRegistry")
@@ -396,7 +380,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }*/
 
     /**
-     * 使用redis维护用户会话信息
+     * spring session 提供实现。
+     * 使用redis维护用户会话信息，分布式环境下可控制同一用户只登录一端。
      * @return
      */
     @Bean(name = "sessionRegistry")

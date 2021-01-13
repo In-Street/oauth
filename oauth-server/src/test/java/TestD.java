@@ -73,4 +73,21 @@ public class TestD {
 
     }
 
+    @Test
+    public void inheritable() {
+        //子线程获取数据
+        InheritableThreadLocal<Object> threadLocal = new InheritableThreadLocal<>();
+        threadLocal.set("Taylor");
+        new Thread(()->{
+            System.out.println(threadLocal.get());
+        }).start();
+
+        ThreadLocal<Object> local = new ThreadLocal<>();
+        local.set("Swift");
+        new Thread(()->{
+            System.out.println(local.get());
+        }).start();
+
+    }
+
 }
