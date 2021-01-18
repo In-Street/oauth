@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -239,7 +241,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 //不登录时允许访问的接口
                 .antMatchers("/demo/produceCode", "/demo/setSession", "/demo/getSession","/demo/onlineNum").permitAll()
-                .antMatchers("/demo/accessDenied").hasAuthority("ADMIN")
+                //测试角色继承
+                .antMatchers("/demo/accessDenied","/demo/admin").hasRole("ADMIN")
+                .antMatchers("/demo/write").hasRole("WRITE")
+                .antMatchers("/demo/read").hasRole("READ")
                 .anyRequest().authenticated()
                 .and()
                 //配置表单登录细节
@@ -414,4 +419,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
     }*/
+
+    /**
+     * 角色继承: admin 具有 write 和 read 角色的权限；write 具有read的权限；多个关系使用 \n 分割
+     *  ROLE_ADMIN > ROLE_WRITE  \n ROLE_READ > ROLE_USER
+     * @return
+     */
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_WRITE > ROLE_READ");
+        return hierarchy;
+    }
 }

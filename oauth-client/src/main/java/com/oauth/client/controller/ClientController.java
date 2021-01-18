@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
@@ -25,6 +26,8 @@ public class ClientController {
 
     @Autowired
     private OAuth2RestTemplate oAuth2RestTemplate;
+    @Autowired
+    private RestTemplate restTemplate;
 
 
     @GetMapping("/securedPage")
@@ -84,6 +87,15 @@ public class ClientController {
     public Object remoteApiWritePostFilter() {
         String url = "http://localhost:9091/user/writePostFilter";
         List forObject = oAuth2RestTemplate.getForObject(url, List.class);
+        return forObject;
+    }
+
+    @GetMapping(value = "/remoteApi/commonRest/write", produces = "application/json")
+    public Object remoteApiWrite2() {
+        String url = "http://localhost:9091/user/common/write";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Map forObject = restTemplate.postForObject(url, headers, Map.class);
         return forObject;
     }
 }

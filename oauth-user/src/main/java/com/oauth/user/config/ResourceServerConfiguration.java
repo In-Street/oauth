@@ -6,7 +6,6 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -16,7 +15,9 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -29,7 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 //启用资源服务器
 @EnableResourceServer
 //启用方法注解进行权限控制
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
     /**
@@ -53,10 +54,15 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Override
     public void configure(HttpSecurity http) throws Exception {
 
-        http.authorizeRequests()
+      /*  http.authorizeRequests()
                 .antMatchers("/user/**")
                 .authenticated()
-                .anyRequest().permitAll();
+                .anyRequest().permitAll();*/
+        http.authorizeRequests()
+                .antMatchers("/user/admin/**").hasRole("ADMIN")
+                .antMatchers("/user/common/write/**").hasRole("WRITE")
+                .antMatchers("/user/common/read").hasRole("READ")
+                .anyRequest().authenticated();
     }
 
     /**

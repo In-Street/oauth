@@ -55,9 +55,9 @@ Cache-Control: no-cache
 Content-Type: application/json;charset=UTF-8
 
 {
-  "uname": "admin",
-  "pwd": "admin",
-  "code": "1677"
+  "uname": "writer",
+  "pwd": "writer",
+  "code": "5768"
 }
 
 ###
@@ -66,7 +66,12 @@ Accept: */*
 Cache-Control: no-cache
 
 ### client 访问资源服务器接口
-GET {{url}}/remoteApi/admin
+GET {{url}}/remoteApi/read
+Accept: */*
+Cache-Control: no-cache
+
+### 普通 RestTemplate 访问资源服务器
+GET {{url}}/remoteApi/commonRest/write
 Accept: */*
 Cache-Control: no-cache
 
@@ -108,7 +113,7 @@ Accept: */*
 Cache-Control: no-cache
 
 ###server 定义权限，自定义授权异常
-GET {{url}}/demo/accessDenied
+GET {{url}}/demo/admin
 Accept: */*
 Cache-Control: no-cache
 

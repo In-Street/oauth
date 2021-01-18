@@ -93,7 +93,7 @@ WebSecurityConfig configure 方法中设置：http.sessionManagement().sessionFi
 ```
 
 ###TODO
-2.角色继承无效、
+2.角色继承无效、【在授权服务器上配置角色继承，授权服务器上的接口可以体现。资源服务上的接口无法体现继承】
 3.指定接口使用fullyAuthenticated 无效,仍能通过remember me 用户进行访问。
 4. 在client模块中自定义WebSecurity的Order导致的过滤链顺序问题,与@EnableOAuth2Sso。
 5. 使用jwt，refresh_token 时候 提示需要UserDetailService

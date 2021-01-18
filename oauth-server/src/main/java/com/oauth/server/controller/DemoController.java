@@ -105,4 +105,18 @@ public class DemoController {
         System.out.println(keys);
         return keys.size() + "";
     }
+
+    //角色继承测试
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin";
+    }
+    @GetMapping("/write")
+    public String write() {
+        return "write";
+    }
+    @GetMapping("/read")
+    public String read() {
+        return "read";
+    }
 }

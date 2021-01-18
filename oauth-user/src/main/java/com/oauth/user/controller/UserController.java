@@ -47,7 +47,7 @@ public class UserController {
      * @return
      */
     //@PreAuthorize("hasAuthority('READ') or hasAuthority('WRITE')")
-    @PreAuthorize("hasAnyAuthority('READ','WRITE')")
+    //@PreAuthorize("hasAnyAuthority('READ','WRITE')")
     //@PreAuthorize("hasAnyRole('ROLE_READ','ROLE_WRITE')")
     //@PreAuthorize("hasRole('ROLE_READ')")
     @GetMapping("/common/read")
@@ -55,7 +55,7 @@ public class UserController {
         return ImmutableMap.of("name", authentication.getName(), "authorities", authentication.getAuthorities());
     }
 
-    @PreAuthorize("hasAuthority('WRITE')")
+    //@PreAuthorize("hasAuthority('WRITE')")
     //@PreAuthorize("hasRole('WRITE')")
     @PostMapping("/common/write")
     public Object write(OAuth2Authentication authentication) {
@@ -64,7 +64,7 @@ public class UserController {
         return token.getAdditionalInformation().getOrDefault("userDetail", null);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    //@PreAuthorize("hasAuthority('ADMIN')")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin")
     public Map admin(OAuth2Authentication authentication) {
