@@ -1,0 +1,4 @@
+###
+GET {{url}}/user/get
+Accept: */*
+Cache-Control: no-cache
