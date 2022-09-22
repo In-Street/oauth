@@ -12,16 +12,16 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- *
+ * 登录验证流程分析使用
  * @author Cheng Yufei
  * @create 2022-08-29 17:12
  **/
-@Configuration
+//@Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/**").hasRole("ADMIN")/*.anyRequest().authenticated()*/.and()
+        http.authorizeRequests().anyRequest().authenticated().and()
                 //替换原有的登录页面
                 .formLogin()/*.loginPage("/login.html")*//*.permitAll().and()*/;
                 //.csrf().disable();

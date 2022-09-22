@@ -2,3 +2,24 @@
 GET {{url}}/user/get
 Accept: */*
 Cache-Control: no-cache
+
+###
+GET {{url}}/user/admin
+Accept: */*
+Cache-Control: no-cache
+
+###
+GET {{url}}/user/user
+Accept: */*
+Cache-Control: no-cache
+
+###登录
+POST {{url}}/doLogin?uname=admin&pwd=admin
+Accept: */*
+Cache-Control: no-cache
+
+###
+POST {{url}}/logout
+Accept: */*
+Cache-Control: no-cache
+Content-Type: application/json
