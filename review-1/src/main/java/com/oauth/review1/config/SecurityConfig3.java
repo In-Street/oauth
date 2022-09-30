@@ -25,7 +25,7 @@ import java.io.PrintWriter;
  * @author Cheng Yufei
  * @create 2022-09-19 15:53
  **/
-@Configuration
+//@Configuration
 public class SecurityConfig3 extends WebSecurityConfigurerAdapter {
 
     @Autowired

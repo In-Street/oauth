@@ -14,7 +14,7 @@ Accept: */*
 Cache-Control: no-cache
 
 ###登录
-POST {{url}}/doLogin?uname=admin&pwd=admin
+POST {{url}}/doLogin?uname=admin&pwd=admin&remember-me=on
 Accept: */*
 Cache-Control: no-cache
 

@@ -8,23 +8,23 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * json 交互使用
+ * remember me 使用
  * @author Cheng Yufei
  * @create 2022-09-19 15:53
  **/
-//@Configuration
-public class SecurityConfig2 extends WebSecurityConfigurerAdapter {
+@Configuration
+public class SecurityConfig4 extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -32,8 +32,9 @@ public class SecurityConfig2 extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                //permitAll：无需登录
-                .antMatchers("/user/get")/*.permitAll()*/.hasRole("ADMIN")
+                .antMatchers("/user/get").permitAll()
+                .antMatchers("/user/admin").hasRole("admin")
+                .antMatchers("/user/user").hasRole("user")
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginProcessingUrl("/doLogin")
@@ -48,6 +49,9 @@ public class SecurityConfig2 extends WebSecurityConfigurerAdapter {
                 .failureHandler((request, response, ex) -> {
                     returnHandler(response, "登录失败:" + ex.getMessage());
                 })
+                .and()
+                .rememberMe()
+                .key("promise")
                 .and()
                 .exceptionHandling()
                 //未认证处理
@@ -65,7 +69,7 @@ public class SecurityConfig2 extends WebSecurityConfigurerAdapter {
                 //.deleteCookies()
                 .and()
                 //不禁用csrf时，无法通过http工具访问，只能通过页面访问
-                .csrf().ignoringAntMatchers("/doLogin", "/logout");
+                .csrf().ignoringAntMatchers("/doLogin", "/logout","/login");
 
     }
 
@@ -74,9 +78,13 @@ public class SecurityConfig2 extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/js/**", "/css/**", "/images/**");
     }
 
+    @Bean(name = "userDetailsServicexxx")
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("jay").password("jay").roles("USER");
+    public UserDetailsService userDetailsService() {
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(User.withUsername("admin").password("admin").roles("admin").build());
+        manager.createUser(User.withUsername("user").password("user").roles("user").build());
+        return manager;
     }
 
     @Bean(name = "passwordEncoder")
