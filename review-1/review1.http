@@ -13,8 +13,13 @@ GET {{url}}/user/user
 Accept: */*
 Cache-Control: no-cache
 
+###
+GET {{url}}/user/remember
+Accept: */*
+Cache-Control: no-cache
+
 ###登录
-POST {{url}}/doLogin?uname=admin&pwd=admin&remember-me=on
+POST {{url}}/doLogin?uname=user&pwd=user&remember-me=on
 Accept: */*
 Cache-Control: no-cache
 

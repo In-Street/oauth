@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.commons.io.IOUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,5 +35,10 @@ public class UserController {
     @GetMapping("/user")
     public Map user() throws IOException {
         return ImmutableMap.of("username", "user-promise");
+    }
+
+    @GetMapping("/remember")
+    public Map remember() throws IOException {
+        return ImmutableMap.of("username", "remember");
     }
 }
